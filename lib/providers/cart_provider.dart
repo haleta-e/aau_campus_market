@@ -1,50 +1,109 @@
-import 'package:flutter/material.dart';
-import '../models/cart_item.dart';
-import '../models/market_product.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/cart_item_model.dart';
+import '../models/product_model.dart';
+import '../services/storage_service.dart';
+import 'discount_provider.dart';
 
-class CartProvider extends ChangeNotifier {
-  final List<CartItem> _items = [];
-  double _discountRate = 0.0;
-  String? _appliedPromoCode;
+class CartNotifier extends StateNotifier<List<CartItemModel>> {
+  final StorageService _storageService;
 
-  List<CartItem> get items => _items;
-  double get discountRate => _discountRate;
-  String? get appliedPromoCode => _appliedPromoCode;
+  CartNotifier(this._storageService) : super([]) {
+    _restore();
+  }
 
-  double get subtotalETB => _items.fold(0, (sum, item) => sum + item.totalETB);
-  double get discountAmountETB => subtotalETB * _discountRate;
-  double get deliveryFeeETB => _items.isEmpty ? 0.0 : 25.0;
-  double get totalETB => subtotalETB + deliveryFeeETB - discountAmountETB;
+  Future<void> _restore() async {
+    final raw = _storageService.getCartItems();
+    state = raw.map((e) => CartItemModel.fromJson(e)).toList();
+  }
 
-  void addToCart(MarketProduct product) {
-    final existingIndex = _items.indexWhere((i) => i.product.id == product.id);
-    if (existingIndex >= 0) {
-      _items[existingIndex].quantity++;
+  Future<void> addToCart(ProductModel product, {int quantity = 1}) async {
+    final index = state.indexWhere((i) => i.productId == product.id);
+    if (index >= 0) {
+      final existing = state[index];
+      final newQty = existing.quantity + quantity;
+      if (!product.isFromApi && newQty > product.stockQuantity) {
+        throw Exception('Only ${product.stockQuantity} in stock.');
+      }
+      final updated = existing.copyWith(quantity: newQty);
+      state = [...state]..[index] = updated;
+      await _storageService.saveCartItem(product.id, updated.toJson());
     } else {
-      _items.add(CartItem(product: product, quantity: 1));
+      if (!product.isFromApi && quantity > product.stockQuantity) {
+        throw Exception('Only ${product.stockQuantity} in stock.');
+      }
+      final item = CartItemModel.fromProduct(product, quantity: quantity);
+      state = [...state, item];
+      await _storageService.saveCartItem(product.id, item.toJson());
     }
-    notifyListeners();
   }
 
-  bool applyPromoCode(String code) {
-    if (code.trim().toUpperCase() == 'HOLIDAY15') {
-      _discountRate = 0.15;
-      _appliedPromoCode = 'HOLIDAY15';
-      notifyListeners();
-      return true;
-    } else if (code.trim().toUpperCase() == 'AAUSTUDENT10') {
-      _discountRate = 0.10;
-      _appliedPromoCode = 'AAUSTUDENT10';
-      notifyListeners();
-      return true;
-    }
-    return false;
+  Future<void> increaseQuantity(String productId) async {
+    final index = state.indexWhere((i) => i.productId == productId);
+    if (index < 0) return;
+    final item = state[index];
+    if (item.maxStock > 0 && item.quantity >= item.maxStock) return;
+    final updated = item.copyWith(quantity: item.quantity + 1);
+    state = [...state]..[index] = updated;
+    await _storageService.saveCartItem(productId, updated.toJson());
   }
 
-  void clearCart() {
-    _items.clear();
-    _discountRate = 0.0;
-    _appliedPromoCode = null;
-    notifyListeners();
+  Future<void> decreaseQuantity(String productId) async {
+    final index = state.indexWhere((i) => i.productId == productId);
+    if (index < 0) return;
+    final item = state[index];
+    if (item.quantity <= 1) {
+      await removeItem(productId);
+      return;
+    }
+    final updated = item.copyWith(quantity: item.quantity - 1);
+    state = [...state]..[index] = updated;
+    await _storageService.saveCartItem(productId, updated.toJson());
+  }
+
+  Future<void> removeItem(String productId) async {
+    state = state.where((i) => i.productId != productId).toList();
+    await _storageService.removeCartItem(productId);
+  }
+
+  Future<void> clearCart() async {
+    state = [];
+    await _storageService.clearCart();
   }
 }
+
+final cartProvider = StateNotifierProvider<CartNotifier, List<CartItemModel>>((ref) {
+  return CartNotifier(ref.watch(storageServiceProvider));
+});
+
+final cartSubtotalProvider = Provider<double>((ref) {
+  final items = ref.watch(cartProvider);
+  return items.fold(0.0, (sum, item) => sum + item.subtotal);
+});
+
+/// Total discount amount across all cart items, based on active discounts.
+final cartDiscountProvider = Provider<double>((ref) {
+  final items = ref.watch(cartProvider);
+  final discounts = ref.watch(discountProvider).discounts;
+
+  double totalDiscount = 0;
+  for (final item in items) {
+    final matches = discounts.where(
+      (d) => d.isCurrentlyActive && d.applicableCategories.contains(item.category),
+    );
+    if (matches.isNotEmpty) {
+      totalDiscount += item.subtotal * matches.first.percentage / 100;
+    }
+  }
+  return totalDiscount;
+});
+
+final cartTotalProvider = Provider<double>((ref) {
+  final subtotal = ref.watch(cartSubtotalProvider);
+  final discount = ref.watch(cartDiscountProvider);
+  return subtotal - discount;
+});
+
+final cartItemCountProvider = Provider<int>((ref) {
+  final items = ref.watch(cartProvider);
+  return items.fold(0, (sum, item) => sum + item.quantity);
+});

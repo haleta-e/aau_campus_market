@@ -1,42 +1,45 @@
-import 'package:flutter/material.dart';
-import '../services/admin_service.dart';
-import '../models/seller.dart';
-import '../models/market_product.dart';
-import '../models/discount.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../services/storage_service.dart';
 
-class AdminProvider extends ChangeNotifier {
-  bool _isAdminLoggedIn = false;
-  String _adminName = 'AAU System Admin';
+class AdminAuthState {
+  final bool isLoggedIn;
+  final String? errorMessage;
 
-  bool get isAdminLoggedIn => _isAdminLoggedIn;
-  String get adminName => _adminName;
+  const AdminAuthState({this.isLoggedIn = false, this.errorMessage});
+}
 
-  Future<bool> loginAdmin(String email, String password) async {
-    final success = await AdminService.authenticateAdmin(email, password);
-    if (success) {
-      _isAdminLoggedIn = true;
-      notifyListeners();
+class AdminAuthNotifier extends StateNotifier<AdminAuthState> {
+  final StorageService _storageService;
+
+  // Demo-only local admin credentials, per spec — not Fake Store API auth.
+  static const String _adminUsername = 'admin';
+  static const String _adminPassword = 'admin123';
+
+  AdminAuthNotifier(this._storageService) : super(const AdminAuthState()) {
+    _restore();
+  }
+
+  Future<void> _restore() async {
+    final loggedIn = await _storageService.isAdminLoggedIn();
+    state = AdminAuthState(isLoggedIn: loggedIn);
+  }
+
+  Future<bool> login(String username, String password) async {
+    if (username.trim() == _adminUsername && password == _adminPassword) {
+      await _storageService.setAdminLoggedIn(true);
+      state = const AdminAuthState(isLoggedIn: true);
+      return true;
     }
-    return success;
+    state = const AdminAuthState(isLoggedIn: false, errorMessage: 'Invalid admin credentials.');
+    return false;
   }
 
-  void logoutAdmin() {
-    _isAdminLoggedIn = false;
-    notifyListeners();
-  }
-
-  void verifySeller(Seller seller) {
-    AdminService.toggleSellerVerification(seller);
-    notifyListeners();
-  }
-
-  void adjustStock(MarketProduct product, int newStock) {
-    AdminService.updateProductStock(product, newStock);
-    notifyListeners();
-  }
-
-  void addDiscount(Discount discount) {
-    AdminService.addAcademicDiscount(discount);
-    notifyListeners();
+  Future<void> logout() async {
+    await _storageService.setAdminLoggedIn(false);
+    state = const AdminAuthState();
   }
 }
+
+final adminAuthProvider = StateNotifierProvider<AdminAuthNotifier, AdminAuthState>((ref) {
+  return AdminAuthNotifier(ref.watch(storageServiceProvider));
+});
