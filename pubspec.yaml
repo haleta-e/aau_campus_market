@@ -1,24 +1,50 @@
 name: aau_campus_market
-description: Addis Ababa University (AAU) Campus Marketplace Mobile App in Dart & Flutter
+description: "AAU Campus Market - Your Campus Marketplace"
 publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: '>=3.3.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
+
+  # State management
+  flutter_riverpod: ^2.5.1
+
+  # Networking
+  http: ^1.2.1
+
+  # Local persistence
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  shared_preferences: ^2.2.3
+
+  # Utilities
+  intl: ^0.19.0
+  uuid: ^4.4.0
   cupertino_icons: ^1.0.6
-  provider: ^6.1.1
-  google_fonts: ^6.1.0
-  shared_preferences: ^2.2.2
-  http: ^1.2.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints: ^4.0.0
+  hive_generator: ^2.0.1
+  build_runner: ^2.4.11
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/data/students.json
+    - assets/data/campuses.json
+    - assets/data/sellers.json
+    - assets/data/local_products.json
+    - assets/data/discounts.json
+    - assets/images/logo.png
+    - assets/images/placeholder.png
+    - assets/images/products/
 
 
   

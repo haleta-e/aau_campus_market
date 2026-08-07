@@ -1,70 +1,77 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
-import 'providers/auth_provider.dart';
-import 'providers/product_provider.dart';
-import 'providers/category_provider.dart';
-import 'providers/cart_provider.dart';
-import 'providers/order_provider.dart';
-import 'providers/search_provider.dart';
-import 'providers/admin_provider.dart';
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-import 'screens/splash_screen.dart';
-import 'screens/login_screen.dart';
-import 'screens/home_screen.dart';
-import 'screens/product_details_screen.dart';
-import 'screens/search_screen.dart';
-import 'screens/category_products_screen.dart';
-import 'screens/cart_screen.dart';
-import 'screens/checkout_screen.dart';
-import 'screens/orders_screen.dart';
-import 'screens/order_details_screen.dart';
-import 'screens/profile_screen.dart';
-import 'screens/admin_dashboard_screen.dart';
+  // Initialize local storage (Hive) before the app runs.
+  await Hive.initFlutter();
 
-import 'utils/theme.dart';
-
-void main() {
   runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => ProductProvider()),
-        ChangeNotifierProvider(create: (_) => CategoryProvider()),
-        ChangeNotifierProvider(create: (_) => CartProvider()),
-        ChangeNotifierProvider(create: (_) => OrderProvider()),
-        ChangeNotifierProvider(create: (_) => SearchProvider()),
-        ChangeNotifierProvider(create: (_) => AdminProvider()),
-      ],
-      child: const AAUCampusApp(),
+    const ProviderScope(
+      child: AAUCampusMarketApp(),
     ),
   );
 }
 
-class AAUCampusApp extends StatelessWidget {
-  const AAUCampusApp({Key? key}) : super(key: key);
+class AAUCampusMarketApp extends StatelessWidget {
+  const AAUCampusMarketApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'AAU Campus Marketplace',
+      title: 'AAU Campus Market',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const SplashScreen(),
-        '/login': (context) => const LoginScreen(),
-        '/home': (context) => const HomeScreen(),
-        '/product-details': (context) => const ProductDetailsScreen(),
-        '/search': (context) => const SearchScreen(),
-        '/category': (context) => const CategoryProductsScreen(categoryName: 'Snacks'),
-        '/cart': (context) => const CartScreen(),
-        '/checkout': (context) => const CheckoutScreen(),
-        '/orders': (context) => const OrdersScreen(),
-        '/order-details': (context) => const OrderDetailsScreen(),
-        '/profile': (context) => const ProfileScreen(),
-        '/admin': (context) => const AdminDashboardScreen(),
-      },
+      theme: ThemeData(
+        useMaterial3: true,
+        colorSchemeSeed: const Color(0xFF2E7D32), // AAU-inspired green
+        scaffoldBackgroundColor: const Color(0xFFF7F8FA),
+        appBarTheme: const AppBarTheme(
+          centerTitle: true,
+          elevation: 0,
+        ),
+        cardTheme: CardTheme(
+          elevation: 1,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          filled: true,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
+      ),
+      // Temporary placeholder home — replaced with the real
+      // login screen in the next step once auth/services exist.
+      home: const _BootstrapPlaceholder(),
+    );
+  }
+}
+
+class _BootstrapPlaceholder extends StatelessWidget {
+  const _BootstrapPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(
+        child: Text(
+          'AAU Campus Market\nYour Campus Marketplace',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+        ),
+      ),
     );
   }
 }

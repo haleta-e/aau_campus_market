@@ -45,6 +45,6 @@
     "code": "LD",
     "description": "Additional AAU campus location.",
     "academicFocus": "General Studies",
-    "deliveryAvailable": false
+    "deliveryAvailable": true
   }
 ]

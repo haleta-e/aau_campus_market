@@ -1,0 +1,182 @@
+[
+  {
+    "studentId": "UGR/1001/24",
+    "name": "Bereket Alemu",
+    "department": "Computer Science",
+    "campusId": "campus_4kilo",
+    "email": "bereket.alemu@aau.edu.et",
+    "phone": "+251911223344",
+    "apiUsername": "mor_2314",
+    "apiPassword": "83r5^_"
+  },
+  {
+    "studentId": "UGR/1002/24",
+    "name": "Selamawit Tesfaye",
+    "department": "Mathematics",
+    "campusId": "campus_4kilo",
+    "email": "selamawit.tesfaye@aau.edu.et",
+    "phone": "+251911223345",
+    "apiUsername": "mor_2314",
+    "apiPassword": "83r5^_"
+  },
+  {
+    "studentId": "UGR/1003/23",
+    "name": "Nahom Girma",
+    "department": "Biology",
+    "campusId": "campus_4kilo",
+    "email": "nahom.girma@aau.edu.et",
+    "phone": "+251911223346",
+    "apiUsername": "mor_2314",
+    "apiPassword": "83r5^_"
+  },
+  {
+    "studentId": "UGR/2001/24",
+    "name": "Hana Mekonnen",
+    "department": "Electrical Engineering",
+    "campusId": "campus_5kilo",
+    "email": "hana.mekonnen@aau.edu.et",
+    "phone": "+251911223347",
+    "apiUsername": "mor_2314",
+    "apiPassword": "83r5^_"
+  },
+  {
+    "studentId": "UGR/2002/24",
+    "name": "Yonas Tadesse",
+    "department": "Mechanical Engineering",
+    "campusId": "campus_5kilo",
+    "email": "yonas.tadesse@aau.edu.et",
+    "phone": "+251911223348",
+    "apiUsername": "mor_2314",
+    "apiPassword": "83r5^_"
+  },
+  {
+    "studentId": "UGR/2003/22",
+    "name": "Rahel Getachew",
+    "department": "Civil Engineering",
+    "campusId": "campus_5kilo",
+    "email": "rahel.getachew@aau.edu.et",
+    "phone": "+251911223349",
+    "apiUsername": "mor_2314",
+    "apiPassword": "83r5^_"
+  },
+  {
+    "studentId": "UGR/3001/24",
+    "name": "Dawit Solomon",
+    "department": "Economics",
+    "campusId": "campus_6kilo",
+    "email": "dawit.solomon@aau.edu.et",
+    "phone": "+251911223350",
+    "apiUsername": "mor_2314",
+    "apiPassword": "83r5^_"
+  },
+  {
+    "studentId": "UGR/3002/24",
+    "name": "Marta Haile",
+    "department": "Political Science",
+    "campusId": "campus_6kilo",
+    "email": "marta.haile@aau.edu.et",
+    "phone": "+251911223351",
+    "apiUsername": "mor_2314",
+    "apiPassword": "83r5^_"
+  },
+  {
+    "studentId": "UGR/3003/23",
+    "name": "Elias Bekele",
+    "department": "Sociology",
+    "campusId": "campus_6kilo",
+    "email": "elias.bekele@aau.edu.et",
+    "phone": "+251911223352",
+    "apiUsername": "mor_2314",
+    "apiPassword": "83r5^_"
+  },
+  {
+    "studentId": "UGR/4001/24",
+    "name": "Tigist Worku",
+    "department": "Logistics and Supply Chain Management",
+    "campusId": "campus_mexico",
+    "email": "tigist.worku@aau.edu.et",
+    "phone": "+251911223353",
+    "apiUsername": "mor_2314",
+    "apiPassword": "83r5^_"
+  },
+  {
+    "studentId": "UGR/4002/24",
+    "name": "Abel Fikru",
+    "department": "Transport Management",
+    "campusId": "campus_mexico",
+    "email": "abel.fikru@aau.edu.et",
+    "phone": "+251911223354",
+    "apiUsername": "mor_2314",
+    "apiPassword": "83r5^_"
+  },
+  {
+    "studentId": "UGR/4003/22",
+    "name": "Sara Dejene",
+    "department": "Logistics and Supply Chain Management",
+    "campusId": "campus_mexico",
+    "email": "sara.dejene@aau.edu.et",
+    "phone": "+251911223355",
+    "apiUsername": "mor_2314",
+    "apiPassword": "83r5^_"
+  },
+  {
+    "studentId": "UGR/5001/24",
+    "name": "Kalkidan Assefa",
+    "department": "Nursing",
+    "campusId": "campus_seferselam",
+    "email": "kalkidan.assefa@aau.edu.et",
+    "phone": "+251911223356",
+    "apiUsername": "mor_2314",
+    "apiPassword": "83r5^_"
+  },
+  {
+    "studentId": "UGR/5002/24",
+    "name": "Amanuel Wolde",
+    "department": "Pharmacy",
+    "campusId": "campus_seferselam",
+    "email": "amanuel.wolde@aau.edu.et",
+    "phone": "+251911223357",
+    "apiUsername": "mor_2314",
+    "apiPassword": "83r5^_"
+  },
+  {
+    "studentId": "UGR/5003/23",
+    "name": "Bethlehem Yirga",
+    "department": "Public Health",
+    "campusId": "campus_seferselam",
+    "email": "bethlehem.yirga@aau.edu.et",
+    "phone": "+251911223358",
+    "apiUsername": "mor_2314",
+    "apiPassword": "83r5^_"
+  },
+  {
+    "studentId": "UGR/6001/24",
+    "name": "Mikiyas Tsegaye",
+    "department": "General Studies",
+    "campusId": "campus_ledeta",
+    "email": "mikiyas.tsegaye@aau.edu.et",
+    "phone": "+251911223359",
+    "apiUsername": "mor_2314",
+    "apiPassword": "83r5^_"
+  },
+  {
+    "studentId": "UGR/6002/24",
+    "name": "Liya Abebe",
+    "department": "General Studies",
+    "campusId": "campus_ledeta",
+    "email": "liya.abebe@aau.edu.et",
+    "phone": "+251911223360",
+    "apiUsername": "mor_2314",
+    "apiPassword": "83r5^_"
+  },
+  {
+    "studentId": "UGR/6003/22",
+    "name": "Samuel Negash",
+    "department": "General Studies",
+    "campusId": "campus_ledeta",
+    "email": "samuel.negash@aau.edu.et",
+    "phone": "+251911223361",
+    "apiUsername": "mor_2314",
+    "apiPassword": "83r5^_"
+  }
+]
