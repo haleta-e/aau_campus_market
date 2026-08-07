@@ -1,0 +1,50 @@
+[
+  {
+    "id": "campus_4kilo",
+    "name": "4 Kilo",
+    "code": "4K",
+    "description": "Main campus for Computational and Natural Sciences programs.",
+    "academicFocus": "Computational and Natural Sciences",
+    "deliveryAvailable": true
+  },
+  {
+    "id": "campus_5kilo",
+    "name": "5 Kilo",
+    "code": "5K",
+    "description": "Engineering campus with technical labs and workshops.",
+    "academicFocus": "Engineering",
+    "deliveryAvailable": true
+  },
+  {
+    "id": "campus_6kilo",
+    "name": "6 Kilo",
+    "code": "6K",
+    "description": "Campus for Social Sciences and Humanities programs.",
+    "academicFocus": "Social Sciences",
+    "deliveryAvailable": true
+  },
+  {
+    "id": "campus_mexico",
+    "name": "Mexico",
+    "code": "MX",
+    "description": "Campus focused on logistics-related departments.",
+    "academicFocus": "Logistics",
+    "deliveryAvailable": true
+  },
+  {
+    "id": "campus_seferselam",
+    "name": "Sefer Selam",
+    "code": "SS",
+    "description": "Campus dedicated to health-related departments.",
+    "academicFocus": "Health Sciences",
+    "deliveryAvailable": true
+  },
+  {
+    "id": "campus_ledeta",
+    "name": "Ledeta",
+    "code": "LD",
+    "description": "Additional AAU campus location.",
+    "academicFocus": "General Studies",
+    "deliveryAvailable": false
+  }
+]
