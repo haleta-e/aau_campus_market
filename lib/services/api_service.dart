@@ -26,7 +26,7 @@ class ApiService {
           )
           .timeout(_timeout);
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         final token = data['token'] as String?;
         if (token == null || token.isEmpty) {
