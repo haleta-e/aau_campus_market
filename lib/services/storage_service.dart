@@ -10,6 +10,7 @@ class StorageService {
   static const String sellersBox = 'sellers_box';
   static const String productsBox = 'local_products_box';
   static const String discountsBox = 'discounts_box';
+  static const String reviewsBox = 'reviews_box';
 
   // SharedPreferences keys
   static const String _keyStudentId = 'session_student_id';
@@ -30,6 +31,7 @@ class StorageService {
       Hive.openBox(sellersBox),
       Hive.openBox(productsBox),
       Hive.openBox(discountsBox),
+      Hive.openBox(reviewsBox),
     ]);
   }
 
