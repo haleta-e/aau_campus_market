@@ -32,7 +32,7 @@ class AAUCampusMarketApp extends StatelessWidget {
         colorSchemeSeed: const Color(0xFF2E7D32),
         scaffoldBackgroundColor: const Color(0xFFF7F8FA),
         appBarTheme: const AppBarTheme(centerTitle: false, elevation: 0),
-        cardTheme: CardTheme(elevation: 1, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+        cardTheme: CardThemeData(elevation: 1, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
         inputDecorationTheme: InputDecorationTheme(
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           filled: true,

@@ -57,14 +57,20 @@ class HomeScreen extends ConsumerWidget {
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 children: ref.watch(categoriesProvider).map((c) {
-                  return CategoryChip(
-                    label: c,
-                    selected: false,
-                    onTap: () {
-                      ref.read(selectedCategoryProvider.notifier).state = c;
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const ProductsScreen()));
-                    },
-                  );
+                   return CategoryChip(
+  label: c,
+  isSelected: false,
+  onSelected: (value) {
+    ref.read(selectedCategoryProvider.notifier).state = c;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const ProductsScreen(),
+      ),
+    );
+  },
+);
                 }).toList(),
               ),
             ),

@@ -36,14 +36,21 @@ class ProductsScreen extends ConsumerWidget {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             children: [
-              CategoryChip(
-                label: 'All', selected: selectedCategory == null,
-                onTap: () => ref.read(selectedCategoryProvider.notifier).state = null,
-              ),
-              ...categories.map((c) => CategoryChip(
-                    label: c, selected: selectedCategory == c,
-                    onTap: () => ref.read(selectedCategoryProvider.notifier).state = c,
-                  )),
+           CategoryChip(
+  label: 'All',
+  isSelected: selectedCategory == null,
+  onSelected: (value) =>
+      ref.read(selectedCategoryProvider.notifier).state = null,
+),
+
+...categories.map(
+  (c) => CategoryChip(
+    label: c,
+    isSelected: selectedCategory == c,
+    onSelected: (value) =>
+        ref.read(selectedCategoryProvider.notifier).state = c,
+  ),
+),
             ],
           ),
         ),

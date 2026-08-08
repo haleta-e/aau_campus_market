@@ -1,31 +1,27 @@
 import 'package:flutter/material.dart';
+import '../models/discount_model.dart';
 
-class HolidayBanner extends StatelessWidget {
-  const HolidayBanner({Key? key}) : super(key: key);
+class DiscountBanner extends StatelessWidget {
+  final DiscountModel discount;
+  const DiscountBanner({super.key, required this.discount});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [Color(0xFF0F172A), Color(0xFF78350F)]),
-        borderRadius: BorderRadius.circular(20),
+        gradient: const LinearGradient(colors: [Color(0xFF2E7D32), Color(0xFF66BB6A)]),
+        borderRadius: BorderRadius.circular(14),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(color: Colors.amber, borderRadius: BorderRadius.circular(10)),
-            child: const Text('⚡ AAU ACADEMIC DISCOUNT', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
-          ),
-          const SizedBox(height: 8),
-          const Text('Semester Final Exams Prep Discount 🎉', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-          const SizedBox(height: 4),
-          const Text('15% OFF Stationeries & Dorm Snacks with promo code HOLIDAY15', style: TextStyle(color: Colors.amber, fontSize: 12)),
-        ],
-      ),
+      child: Row(children: [
+        const Icon(Icons.local_offer, color: Colors.white),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text('${discount.name} — ${discount.percentage.toInt()}% off',
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+        ),
+      ]),
     );
   }
 }

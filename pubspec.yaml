@@ -43,7 +43,6 @@ flutter:
     - assets/data/local_products.json
     - assets/data/discounts.json
     - assets/images/logo.png
-    - assets/images/placeholder.png
     - assets/images/products/
 
 
