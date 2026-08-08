@@ -31,8 +31,12 @@ class CartItemCard extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(item.name, style: const TextStyle(fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+             Text(item.name, style: const TextStyle(fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
               Text(Formatters.currency(item.price)),
+              if (item.note != null && item.note!.isNotEmpty)
+                Text('Note: ${item.note}',
+                    style: const TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: Colors.grey),
+                    maxLines: 1, overflow: TextOverflow.ellipsis),
               Row(children: [
                 IconButton(icon: const Icon(Icons.remove_circle_outline), onPressed: onDecrease),
                 Text('${item.quantity}'),

@@ -17,7 +17,7 @@ class CartNotifier extends StateNotifier<List<CartItemModel>> {
     state = raw.map((e) => CartItemModel.fromJson(e)).toList();
   }
 
-  Future<void> addToCart(ProductModel product, {int quantity = 1}) async {
+  Future<void> addToCart(ProductModel product, {int quantity = 1, String? note}) async {
     final index = state.indexWhere((i) => i.productId == product.id);
     if (index >= 0) {
       final existing = state[index];
@@ -25,14 +25,15 @@ class CartNotifier extends StateNotifier<List<CartItemModel>> {
       if (!product.isFromApi && newQty > product.stockQuantity) {
         throw Exception('Only ${product.stockQuantity} in stock.');
       }
-      final updated = existing.copyWith(quantity: newQty);
+      // If a new note was typed, it replaces the old one; otherwise keep it.
+      final updated = existing.copyWith(quantity: newQty, note: note ?? existing.note);
       state = [...state]..[index] = updated;
       await _storageService.saveCartItem(product.id, updated.toJson());
     } else {
       if (!product.isFromApi && quantity > product.stockQuantity) {
         throw Exception('Only ${product.stockQuantity} in stock.');
       }
-      final item = CartItemModel.fromProduct(product, quantity: quantity);
+      final item = CartItemModel.fromProduct(product, quantity: quantity, note: note);
       state = [...state, item];
       await _storageService.saveCartItem(product.id, item.toJson());
     }

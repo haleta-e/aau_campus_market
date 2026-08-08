@@ -8,6 +8,7 @@ class CartItemModel {
   final String category;
   final ProductSource source;
   final int maxStock;
+  final String? note;
   int quantity;
 
   CartItemModel({
@@ -19,11 +20,12 @@ class CartItemModel {
     required this.source,
     required this.maxStock,
     required this.quantity,
+    this.note,
   });
 
   double get subtotal => price * quantity;
 
-  factory CartItemModel.fromProduct(ProductModel product, {int quantity = 1}) {
+  factory CartItemModel.fromProduct(ProductModel product, {int quantity = 1, String? note}) {
     return CartItemModel(
       productId: product.id,
       name: product.name,
@@ -33,6 +35,7 @@ class CartItemModel {
       source: product.source,
       maxStock: product.stockQuantity,
       quantity: quantity,
+      note: (note != null && note.trim().isNotEmpty) ? note.trim() : null,
     );
   }
 
@@ -46,6 +49,7 @@ class CartItemModel {
       source: (json['source'] as String) == 'api' ? ProductSource.api : ProductSource.local,
       maxStock: json['maxStock'] as int,
       quantity: json['quantity'] as int,
+      note: json['note'] as String?,
     );
   }
 
@@ -59,10 +63,11 @@ class CartItemModel {
       'source': source.name,
       'maxStock': maxStock,
       'quantity': quantity,
+      'note': note,
     };
   }
 
-  CartItemModel copyWith({int? quantity}) {
+  CartItemModel copyWith({int? quantity, String? note}) {
     return CartItemModel(
       productId: productId,
       name: name,
@@ -72,6 +77,7 @@ class CartItemModel {
       source: source,
       maxStock: maxStock,
       quantity: quantity ?? this.quantity,
+      note: note ?? this.note,
     );
   }
 }
