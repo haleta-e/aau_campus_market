@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../models/cart_item_model.dart';
 import '../../providers/product_provider.dart';
 import '../../providers/seller_provider.dart';
@@ -9,6 +10,7 @@ import '../../providers/cart_provider.dart';
 import '../../services/discount_service.dart';
 import '../../utils/formatters.dart';
 import '../checkout/checkout_screen.dart';
+import '../sellers/seller_details_screen.dart';
 
 class ProductDetailsScreen extends ConsumerStatefulWidget {
   final String productId;
@@ -20,6 +22,18 @@ class ProductDetailsScreen extends ConsumerStatefulWidget {
 
 class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
   int _quantity = 1;
+  final _noteController = TextEditingController();
+
+  @override
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _call(String phone) async {
+    final uri = Uri(scheme: 'tel', path: phone);
+    if (await canLaunchUrl(uri)) await launchUrl(uri);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +88,17 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
           Text(product.description),
           const SizedBox(height: 16),
           const Text('Estimated delivery: 20–40 mins on campus', style: TextStyle(color: Colors.grey)),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _noteController,
+            decoration: const InputDecoration(
+              labelText: 'Note for seller (optional)',
+              hintText: 'e.g. extra cold, or a specific brand',
+              border: OutlineInputBorder(),
+              isDense: true,
+            ),
+            maxLines: 2,
+          ),
           if (productSellers.isNotEmpty) ...[
             const Divider(height: 32),
             const Text('Seller', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -84,9 +109,12 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                   title: Text(s.name),
                   subtitle: Text('${s.department} • ${s.active ? "Active" : "Currently unavailable"}'),
                   trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                    IconButton(icon: const Icon(Icons.call_outlined), onPressed: () => _call(s.phone)),
                     const Icon(Icons.star, size: 16, color: Colors.amber),
                     Text('${s.rating}'),
                   ]),
+                  onTap: () => Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => SellerDetailsScreen(sellerId: s.id))),
                 )),
           ],
         ],
@@ -126,7 +154,11 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                       ? null
                       : () async {
                           try {
-                            await ref.read(cartProvider.notifier).addToCart(product, quantity: _quantity);
+                            await ref.read(cartProvider.notifier).addToCart(
+                                  product,
+                                  quantity: _quantity,
+                                  note: _noteController.text,
+                                );
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Added to cart')));
                             }
@@ -152,7 +184,9 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                             );
                             return;
                           }
-                          final buyNowItem = CartItemModel.fromProduct(product, quantity: _quantity);
+                          final buyNowItem = CartItemModel.fromProduct(
+                            product, quantity: _quantity, note: _noteController.text,
+                          );
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (_) => CheckoutScreen(directItems: [buyNowItem])),
