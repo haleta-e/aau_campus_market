@@ -1,27 +1,22 @@
 import 'package:flutter/material.dart';
 
-class ErrorStateWidget extends StatelessWidget {
-  final String errorMessage;
+class ErrorState extends StatelessWidget {
+  final String message;
   final VoidCallback onRetry;
-
-  const ErrorStateWidget({
-    Key? key,
-    required this.errorMessage,
-    required this.onRetry,
-  }) : super(key: key);
+  const ErrorState({super.key, required this.message, required this.onRetry});
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 48, color: Colors.red),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const Icon(Icons.error_outline, size: 56, color: Colors.redAccent),
           const SizedBox(height: 12),
-          Text(errorMessage, style: const TextStyle(color: Colors.red)),
-          const SizedBox(height: 12),
-          ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
-        ],
+          Text(message, textAlign: TextAlign.center),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(onPressed: onRetry, icon: const Icon(Icons.refresh), label: const Text('Retry')),
+        ]),
       ),
     );
   }

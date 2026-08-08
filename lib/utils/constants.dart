@@ -1,12 +1,8 @@
-class Constants {
-  static const String appName = 'AAU Campus Marketplace';
-  static const List<String> campuses = [
-    '4 Kilo',
-    '5 Kilo',
-    'Sidist Kilo',
-    'Mexico',
-    'Ledeta',
-    'Sefer Selam'
+class AppConstants {
+  static const String appName = 'AAU Campus Market';
+  static const String tagline = 'Your Campus Marketplace';
+  static const List<String> paymentMethods = ['Cash', 'Telebirr', 'CBE Birr', 'Pay on Delivery'];
+  static const List<String> categories = [
+    'Electronics', 'Fashion', 'Accessories', 'Stationery', 'Snacks', 'Drinks', 'Detergent', 'Sanitary'
   ];
-  static const double defaultDeliveryFee = 25.0;
 }

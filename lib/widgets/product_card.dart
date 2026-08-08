@@ -1,41 +1,27 @@
 import 'package:flutter/material.dart';
-import '../models/market_product.dart';
+import '../models/discount_model.dart';
 
-class ProductCard extends StatelessWidget {
-  final MarketProduct product;
-  final VoidCallback onTap;
-
-  const ProductCard({Key? key, required this.product, required this.onTap}) : super(key: key);
+class DiscountBanner extends StatelessWidget {
+  final DiscountModel discount;
+  const DiscountBanner({super.key, required this.discount});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                child: Image.network(product.image, width: double.infinity, fit: BoxFit.cover),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(product.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                  Text('${product.priceETB.toStringAsFixed(0)} ETB', style: TextStyle(color: Colors.amber[900], fontWeight: FontWeight.bold)),
-                ],
-              ),
-            ),
-          ],
-        ),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(colors: [Color(0xFF2E7D32), Color(0xFF66BB6A)]),
+        borderRadius: BorderRadius.circular(14),
       ),
+      child: Row(children: [
+        const Icon(Icons.local_offer, color: Colors.white),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text('${discount.name} — ${discount.percentage.toInt()}% off',
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+        ),
+      ]),
     );
   }
 }
