@@ -92,16 +92,30 @@ final categoriesProvider = Provider<List<String>>((ref) {
 final searchQueryProvider = StateProvider<String>((ref) => '');
 final selectedCategoryProvider = StateProvider<String?>((ref) => null);
 
+/// When true, Products screen shows items from every campus — lets a
+/// student check whether something's worth ordering with delivery vs
+/// just waiting until they're at that campus themselves.
+final viewAllCampusesProvider = StateProvider<bool>((ref) => false);
+
+/// Narrows results to one specific seller's products (used by Seller
+/// Details screen).
+final sellerFilterProvider = StateProvider<String?>((ref) => null);
+
 /// What Home/Products screens actually render: campus + category + search applied.
 final filteredProductsProvider = Provider<List<ProductModel>>((ref) {
   final service = ref.watch(productServiceProvider);
   final allProducts = ref.watch(productProvider).products;
   final campusId = ref.watch(selectedCampusProvider);
+  final viewAll = ref.watch(viewAllCampusesProvider);
   final category = ref.watch(selectedCategoryProvider);
   final query = ref.watch(searchQueryProvider);
+  final sellerId = ref.watch(sellerFilterProvider);
 
-  var result = service.filterByCampus(allProducts, campusId);
+  var result = viewAll ? allProducts : service.filterByCampus(allProducts, campusId);
   result = service.filterByCategory(result, category);
   result = service.search(result, query);
+  if (sellerId != null) {
+    result = result.where((p) => p.sellerIds.contains(sellerId)).toList();
+  }
   return result;
 });

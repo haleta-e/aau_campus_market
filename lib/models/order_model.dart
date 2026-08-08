@@ -22,8 +22,10 @@ class OrderModel {
   final List<CartItemModel> items;
   final double subtotal;
   final double discount;
+  final double deliveryFee;
   final double total;
   final String paymentMethod;
+  final String fulfillmentMethod; // 'delivery' or 'pickup'
   final String campusId;
   final List<String> sellerIds;
   final DateTime orderDate;
@@ -34,15 +36,17 @@ class OrderModel {
     required this.items,
     required this.subtotal,
     required this.discount,
+    this.deliveryFee = 0,
     required this.total,
     required this.paymentMethod,
+    this.fulfillmentMethod = 'delivery',
     required this.campusId,
     required this.sellerIds,
     required this.orderDate,
     required this.status,
   });
 
-  factory OrderModel.fromJson(Map<String, dynamic> json) {
+ factory OrderModel.fromJson(Map<String, dynamic> json) {
     return OrderModel(
       orderId: json['orderId'] as String,
       items: (json['items'] as List)
@@ -50,8 +54,10 @@ class OrderModel {
           .toList(),
       subtotal: (json['subtotal'] as num).toDouble(),
       discount: (json['discount'] as num).toDouble(),
+      deliveryFee: (json['deliveryFee'] as num?)?.toDouble() ?? 0,
       total: (json['total'] as num).toDouble(),
       paymentMethod: json['paymentMethod'] as String,
+      fulfillmentMethod: json['fulfillmentMethod'] as String? ?? 'delivery',
       campusId: json['campusId'] as String,
       sellerIds: List<String>.from(json['sellerIds'] as List),
       orderDate: DateTime.parse(json['orderDate'] as String),
@@ -62,14 +68,16 @@ class OrderModel {
     );
   }
 
-  Map<String, dynamic> toJson() {
+ Map<String, dynamic> toJson() {
     return {
       'orderId': orderId,
       'items': items.map((e) => e.toJson()).toList(),
       'subtotal': subtotal,
       'discount': discount,
+      'deliveryFee': deliveryFee,
       'total': total,
       'paymentMethod': paymentMethod,
+      'fulfillmentMethod': fulfillmentMethod,
       'campusId': campusId,
       'sellerIds': sellerIds,
       'orderDate': orderDate.toIso8601String(),
@@ -83,8 +91,10 @@ class OrderModel {
       items: items,
       subtotal: subtotal,
       discount: discount,
+      deliveryFee: deliveryFee,
       total: total,
       paymentMethod: paymentMethod,
+      fulfillmentMethod: fulfillmentMethod,
       campusId: campusId,
       sellerIds: sellerIds,
       orderDate: orderDate,

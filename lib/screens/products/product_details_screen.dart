@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../models/cart_item_model.dart';
 import '../../providers/product_provider.dart';
 import '../../providers/seller_provider.dart';
+import '../../providers/campus_provider.dart';
 import '../../providers/discount_provider.dart';
 import '../../providers/cart_provider.dart';
 import '../../services/discount_service.dart';
 import '../../utils/formatters.dart';
+import '../checkout/checkout_screen.dart';
 
 class ProductDetailsScreen extends ConsumerStatefulWidget {
   final String productId;
@@ -28,6 +31,11 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
 
     final sellers = ref.watch(sellerProvider).sellers;
     final productSellers = sellers.where((s) => product.sellerIds.contains(s.id)).toList();
+    final campuses = ref.watch(campusProvider).campuses;
+    final campusNames = product.availableCampuses
+        .map((id) => campuses.where((c) => c.id == id).map((c) => c.name).firstOrNull)
+        .whereType<String>()
+        .toList();
     final discounts = ref.watch(activeDiscountsProvider);
     final discountService = ref.watch(discountServiceProvider);
     final price = discountService.applyDiscount(product, discounts);
@@ -55,10 +63,12 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
             ],
           ]),
           const SizedBox(height: 8),
-          Wrap(spacing: 8, children: [
+          Wrap(spacing: 8, runSpacing: 8, children: [
             Chip(label: Text(product.category)),
             if (product.apiRating != null) Chip(avatar: const Icon(Icons.star, size: 16, color: Colors.amber), label: Text('${product.apiRating}')),
             if (product.isLocal) Chip(label: Text(product.isInStock ? 'In stock (${product.stockQuantity})' : 'Out of stock')),
+            if (product.isLocal)
+              ...campusNames.map((name) => Chip(avatar: const Icon(Icons.location_on, size: 16), label: Text(name))),
           ]),
           const SizedBox(height: 16),
           Text(product.description),
@@ -84,31 +94,75 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Row(children: [
-            IconButton(onPressed: () => setState(() => _quantity = _quantity > 1 ? _quantity - 1 : 1), icon: const Icon(Icons.remove_circle_outline)),
-            Text('$_quantity', style: const TextStyle(fontSize: 16)),
-            IconButton(onPressed: () => setState(() => _quantity++), icon: const Icon(Icons.add_circle_outline)),
-            const SizedBox(width: 12),
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: !product.isInStock
-                    ? null
-                    : () async {
-                        try {
-                          await ref.read(cartProvider.notifier).addToCart(product, quantity: _quantity);
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Added to cart')));
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
-                          }
-                        }
-                      },
-                icon: const Icon(Icons.shopping_cart),
-                label: const Text('Add to Cart'),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Row(children: [
+              IconButton(
+                onPressed: () => setState(() => _quantity = _quantity > 1 ? _quantity - 1 : 1),
+                icon: const Icon(Icons.remove_circle_outline),
               ),
-            ),
+              Text('$_quantity', style: const TextStyle(fontSize: 16)),
+              IconButton(
+                onPressed: () => setState(() {
+                  if (!product.isLocal || _quantity < product.stockQuantity) _quantity++;
+                }),
+                icon: const Icon(Icons.add_circle_outline),
+              ),
+              const Spacer(),
+              if (product.isLocal && campusNames.isNotEmpty)
+                Flexible(
+                  child: Text(
+                    'Available at: ${campusNames.join(", ")}',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    textAlign: TextAlign.right,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+            ]),
+            const SizedBox(height: 10),
+            Row(children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: !product.isInStock
+                      ? null
+                      : () async {
+                          try {
+                            await ref.read(cartProvider.notifier).addToCart(product, quantity: _quantity);
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Added to cart')));
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                            }
+                          }
+                        },
+                  icon: const Icon(Icons.shopping_cart_outlined),
+                  label: const Text('Add to Cart'),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: !product.isInStock
+                      ? null
+                      : () {
+                          if (product.isLocal && _quantity > product.stockQuantity) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Only ${product.stockQuantity} in stock.')),
+                            );
+                            return;
+                          }
+                          final buyNowItem = CartItemModel.fromProduct(product, quantity: _quantity);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => CheckoutScreen(directItems: [buyNowItem])),
+                          );
+                        },
+                  icon: const Icon(Icons.flash_on),
+                  label: const Text('Buy Now'),
+                ),
+              ),
+            ]),
           ]),
         ),
       ),

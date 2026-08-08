@@ -6,8 +6,15 @@ class ProductCard extends StatelessWidget {
   final ProductModel product;
   final double displayPrice;
   final VoidCallback onTap;
+  final String? locationLabel;
 
-  const ProductCard({super.key, required this.product, required this.displayPrice, required this.onTap});
+  const ProductCard({
+    super.key,
+    required this.product,
+    required this.displayPrice,
+    required this.onTap,
+    this.locationLabel,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +48,18 @@ class ProductCard extends StatelessWidget {
               ]),
               if (!product.isInStock)
                 const Text('Out of stock', style: TextStyle(color: Colors.red, fontSize: 11)),
+              if (locationLabel != null) ...[
+                const SizedBox(height: 2),
+                Row(children: [
+                  const Icon(Icons.location_on, size: 12, color: Colors.grey),
+                  const SizedBox(width: 2),
+                  Expanded(
+                    child: Text(locationLabel!,
+                        maxLines: 1, overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                  ),
+                ]),
+              ],
             ]),
           ),
         ]),

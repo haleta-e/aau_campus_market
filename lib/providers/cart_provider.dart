@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/cart_item_model.dart';
 import '../models/product_model.dart';
+import '../services/discount_service.dart';
 import '../services/storage_service.dart';
 import 'discount_provider.dart';
 
@@ -84,17 +85,7 @@ final cartSubtotalProvider = Provider<double>((ref) {
 final cartDiscountProvider = Provider<double>((ref) {
   final items = ref.watch(cartProvider);
   final discounts = ref.watch(discountProvider).discounts;
-
-  double totalDiscount = 0;
-  for (final item in items) {
-    final matches = discounts.where(
-      (d) => d.isCurrentlyActive && d.applicableCategories.contains(item.category),
-    );
-    if (matches.isNotEmpty) {
-      totalDiscount += item.subtotal * matches.first.percentage / 100;
-    }
-  }
-  return totalDiscount;
+  return ref.watch(discountServiceProvider).applyToCartItems(items, discounts);
 });
 
 final cartTotalProvider = Provider<double>((ref) {

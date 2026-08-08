@@ -45,8 +45,10 @@ class OrderNotifier extends StateNotifier<OrderState> {
     required List<CartItemModel> items,
     required double subtotal,
     required double discount,
+    double deliveryFee = 0,
     required double total,
     required String paymentMethod,
+    String fulfillmentMethod = 'delivery',
     required String campusId,
     required List<String> sellerIds,
   }) async {
@@ -54,8 +56,10 @@ class OrderNotifier extends StateNotifier<OrderState> {
       items: items,
       subtotal: subtotal,
       discount: discount,
+      deliveryFee: deliveryFee,
       total: total,
       paymentMethod: paymentMethod,
+      fulfillmentMethod: fulfillmentMethod,
       campusId: campusId,
       sellerIds: sellerIds,
     );

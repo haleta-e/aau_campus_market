@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/cart_item_model.dart';
 import '../models/discount_model.dart';
 import '../models/product_model.dart';
 import 'storage_service.dart';
@@ -53,6 +54,22 @@ class DiscountService {
       return product.price - (product.price * d.percentage / 100);
     }
     return product.price;
+  }
+
+  /// Total discount across a list of cart items — shared by the Cart
+  /// screen and the "Buy Now" direct-checkout flow so both compute
+  /// totals identically.
+  double applyToCartItems(List<CartItemModel> items, List<DiscountModel> discounts) {
+    double total = 0;
+    for (final item in items) {
+      final matches = discounts.where(
+        (d) => d.isCurrentlyActive && d.applicableCategories.contains(item.category),
+      );
+      if (matches.isNotEmpty) {
+        total += item.subtotal * matches.first.percentage / 100;
+      }
+    }
+    return total;
   }
 
   Future<void> createDiscount(DiscountModel discount) async {

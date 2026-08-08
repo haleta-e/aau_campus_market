@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/product_model.dart';
+import '../utils/constants.dart';
 import 'api_service.dart';
 import 'storage_service.dart';
 
@@ -35,8 +36,14 @@ class ProductService {
     return raw.map((e) => ProductModel.fromJson(e)).toList();
   }
 
-  Future<List<ProductModel>> getApiProducts() async {
-    return _apiService.getProducts();
+ Future<List<ProductModel>> getApiProducts() async {
+    final products = await _apiService.getProducts();
+    return products.where((p) => !_isExcludedFromMarketplace(p)).toList();
+  }
+
+  bool _isExcludedFromMarketplace(ProductModel product) {
+    final title = product.name.toLowerCase();
+    return AppConstants.excludedApiKeywords.any((k) => title.contains(k.toLowerCase()));
   }
 
   /// The unified marketplace: local + API products together.

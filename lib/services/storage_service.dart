@@ -60,9 +60,14 @@ class StorageService {
     String Function(Map<String, dynamic>) idSelector,
   ) async {
     final box = _box(boxName);
-    if (box.isEmpty) {
-      for (final item in seedData) {
-        await box.put(idSelector(item), item);
+    // Upsert-if-missing instead of "only seed when empty": any product,
+    // campus, seller, or discount added to the JSON later still gets
+    // picked up on next launch, even if the box already has older data.
+    // Existing entries (including admin edits) are left untouched.
+    for (final item in seedData) {
+      final key = idSelector(item);
+      if (!box.containsKey(key)) {
+        await box.put(key, item);
       }
     }
   }
