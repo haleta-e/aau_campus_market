@@ -66,3 +66,51 @@ organized and searchable.
 - **Full Name:** [Etsegenet Amsalu]
 - **CTC Number:** [CTC-1495-26]
 - **Classroom Number:** [30003]
+
+---
+
+## DevOps Practical Assignment Setup
+
+### 1. Building the Backend Docker Image
+To build the Docker image for the Node.js + Express backend from the root directory:
+```bash
+docker build -t YOUR_DOCKERHUB_USERNAME/aau-campus-market-backend:1.0 .
+```
+
+### 2. Running with Docker Compose
+To start the backend and PostgreSQL services together in detached mode:
+```bash
+docker compose up -d --build
+```
+To stop the services and retain database data:
+```bash
+docker compose down
+```
+To stop the services and remove the database volume:
+```bash
+docker compose down -v
+```
+
+### 3. Database Connectivity
+The backend connects to PostgreSQL using environment variables:
+* **Host**: `DB_HOST=db` inside Docker Compose (uses Docker service name resolution).
+* **Port**: `DB_PORT=5432`
+* **Database Name**: `DB_NAME=aau_campus_market_db`
+* **Health Check**: `GET /health` runs a `SELECT NOW()` query to verify live DB connectivity.
+
+### 4. Docker Hub Image Tagging & Pushing
+Tag and push the image to Docker Hub:
+```bash
+docker login
+docker tag YOUR_DOCKERHUB_USERNAME/aau-campus-market-backend:1.0 YOUR_DOCKERHUB_USERNAME/aau-campus-market-backend:1.0
+docker push YOUR_DOCKERHUB_USERNAME/aau-campus-market-backend:1.0
+```
+
+### 5. GitHub Actions CI/CD Workflow
+The repository includes `.github/workflows/ci-cd.yml` which triggers automatically on every push or pull request to `main`/`master`:
+1. Checks out repository source code.
+2. Sets up Node.js environment.
+3. Installs backend dependencies (`npm ci`).
+4. Runs backend unit tests (`npm test`).
+5. Validates Docker image build (`docker build`).
+

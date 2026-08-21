@@ -1,0 +1,30 @@
+# Version control
+.git
+.gitignore
+
+# Node dependencies & environment
+node_modules
+backend/node_modules
+.env
+backend/.env
+npm-debug.log*
+
+# Flutter & Dart build / cache files
+.dart_tool
+.flutter-plugins-dependencies
+.metadata
+build/
+android/
+ios/
+web/
+windows/
+macos/
+linux/
+
+# IDE & Editor files
+.idea
+.vscode
+*.iml
+
+# Test & coverage artifacts
+coverage
