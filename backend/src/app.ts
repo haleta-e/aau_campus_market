@@ -3,8 +3,13 @@ import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './docs/swagger';
 import { checkDatabaseHealth } from './db';
+import path from 'path';
 import authRoutes from './modules/auth/auth.routes';
 import productRoutes from './modules/products/product.routes';
+import orderRoutes from './modules/orders/order.routes';
+import paymentRoutes from './modules/payments/payment.routes';
+import complaintRoutes from './modules/complaints/complaint.routes';
+import adminRoutes from './modules/admin/admin.routes';
 
 const app = express();
 
@@ -69,6 +74,17 @@ app.get('/api/v1', (req: Request, res: Response) => {
 // ─── API v1 Module Routes ───────────────────────────────────────────────────
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/products', productRoutes);
+app.use('/api/v1/orders', orderRoutes);
+app.use('/api/v1/payments', paymentRoutes);
+app.use('/api/v1/complaints', complaintRoutes);
+app.use('/api/v1/admin', adminRoutes);
+
+// ─── Admin Web Dashboard Static Files ──────────────────────────────────────
+const publicPath = path.join(__dirname, '../public');
+app.get(['/admin', '/admin/', '/admin/login', '/admin/dashboard'], (req: Request, res: Response) => {
+  res.sendFile(path.join(publicPath, 'admin', 'index.html'));
+});
+app.use(express.static(publicPath));
 
 // 404 Route Not Found Handler
 app.use((req: Request, res: Response) => {
