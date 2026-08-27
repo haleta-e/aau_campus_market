@@ -3,6 +3,7 @@ import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './docs/swagger';
 import { checkDatabaseHealth } from './db';
+import authRoutes from './modules/auth/auth.routes';
 
 const app = express();
 
@@ -63,6 +64,9 @@ app.get('/api/v1', (req: Request, res: Response) => {
     documentation: '/api/v1/docs',
   });
 });
+
+// ─── API v1 Module Routes ───────────────────────────────────────────────────
+app.use('/api/v1/auth', authRoutes);
 
 // 404 Route Not Found Handler
 app.use((req: Request, res: Response) => {
