@@ -9,8 +9,8 @@
     "dev": "tsx watch src/server.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "db:generate": "drizzle-kit generate",
-    "db:push": "drizzle-kit push",
+    "db:generate": "drizzle-kit generate:pg",
+    "db:push": "drizzle-kit push:pg",
     "db:seed": "tsx src/db/seed.ts"
   },
   "dependencies": {

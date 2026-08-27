@@ -1,6 +1,7 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import { env } from '../config/env';
+import * as schema from './schema';
 
 export const pool = new Pool({
   host: env.DB_HOST,
@@ -17,7 +18,7 @@ pool.on('error', (err) => {
   console.error('Unexpected error on idle PostgreSQL client pool', err);
 });
 
-export const db = drizzle(pool);
+export const db = drizzle(pool, { schema });
 
 export const checkDatabaseHealth = async (): Promise<boolean> => {
   try {
