@@ -61,7 +61,7 @@ class ApiService {
           .post(
             Uri.parse('$baseUrl/auth/login'),
             headers: headers,
-            body: jsonEncode({'email': email, 'password': password}),
+            body: jsonEncode({'usernameOrEmail': email, 'password': password}),
           )
           .timeout(_timeout);
 
@@ -90,6 +90,7 @@ class ApiService {
       throw ApiException('Login failed: ${e.toString()}');
     }
   }
+
 
   Future<Map<String, dynamic>> register({
     required String username,

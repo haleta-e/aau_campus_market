@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/campus_provider.dart';
 import '../../providers/seller_provider.dart';
 import '../../providers/product_provider.dart';
@@ -65,8 +66,7 @@ class AdminDashboardScreen extends ConsumerWidget {
             icon: const Icon(Icons.logout),
             tooltip: 'Logout',
             onPressed: () async {
-              await ref.read(adminAuthProvider.notifier).logout();
-              if (context.mounted) Navigator.pop(context);
+              await ref.read(authProvider.notifier).logout();
             },
           ),
         ],

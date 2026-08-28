@@ -37,25 +37,46 @@ class ProductService {
     return raw.map((e) => ProductModel.fromJson(e)).toList();
   }
 
+
   Future<List<ProductModel>> getBackendProducts() async {
     try {
       return await _apiService.getProducts();
-    } catch (e) {
+    } catch (_) {
       return [];
     }
   }
 
-  /// Unified marketplace: fetches live from AAU backend, falling back to local dataset if offline
+  /// Unified marketplace: always merges LOCAL products + BACKEND products.
+  /// Falls back to local-only if backend is unreachable.
   Future<List<ProductModel>> getAllProducts() async {
-    try {
-      final backendProducts = await getBackendProducts();
-      if (backendProducts.isNotEmpty) {
-        return backendProducts;
-      }
-    } catch (_) {}
+    // Always load local products first
+    final localProducts = await getLocalProducts();
 
-    // Fallback to local products if backend is not reachable
-    return getLocalProducts();
+    // Try to load live backend products and merge them
+    List<ProductModel> backendProducts = [];
+    try {
+      backendProducts = await _apiService.getProducts();
+    } catch (_) {
+      // Backend offline — local products only
+    }
+
+    // Deduplicate: backend products keyed by id take precedence over local with same id
+    final merged = <String, ProductModel>{};
+    for (final p in localProducts) {
+      merged[p.id] = p;
+    }
+    for (final p in backendProducts) {
+      merged[p.id] = p;
+    }
+
+    final all = merged.values.toList();
+    // Sort: local products first, then backend, alphabetically within groups
+    all.sort((a, b) {
+      if (a.isLocal && !b.isLocal) return -1;
+      if (!a.isLocal && b.isLocal) return 1;
+      return a.name.compareTo(b.name);
+    });
+    return all;
   }
 
   List<String> getUnifiedCategories(List<ProductModel> products) {

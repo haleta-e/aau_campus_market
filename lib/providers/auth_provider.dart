@@ -7,19 +7,25 @@ class AuthState {
   final bool isLoading;
   final bool isLoggedIn;
   final StudentModel? student;
+  final String role; // 'BUYER' | 'SELLER' | 'ADMIN'
   final String? errorMessage;
 
   const AuthState({
     this.isLoading = false,
     this.isLoggedIn = false,
     this.student,
+    this.role = 'BUYER',
     this.errorMessage,
   });
+
+  bool get isAdmin => role == 'ADMIN';
+  bool get isSeller => role == 'SELLER';
 
   AuthState copyWith({
     bool? isLoading,
     bool? isLoggedIn,
     StudentModel? student,
+    String? role,
     String? errorMessage,
     bool clearError = false,
   }) {
@@ -27,6 +33,7 @@ class AuthState {
       isLoading: isLoading ?? this.isLoading,
       isLoggedIn: isLoggedIn ?? this.isLoggedIn,
       student: student ?? this.student,
+      role: role ?? this.role,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
@@ -43,8 +50,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> _restoreSession() async {
     final session = await _storageService.getSession();
     if (session != null) {
+      final savedRole = await _storageService.getUserRole() ?? 'BUYER';
       state = state.copyWith(
         isLoggedIn: true,
+        role: savedRole,
         student: StudentModel(
           studentId: session['studentId']!,
           name: session['name']!,
@@ -75,6 +84,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         isLoading: false,
         isLoggedIn: true,
         student: result.student,
+        role: result.role ?? 'BUYER',
         clearError: true,
       );
       return true;

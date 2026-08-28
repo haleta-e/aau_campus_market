@@ -8,6 +8,7 @@ import 'products/products_screen.dart';
 import 'cart/cart_screen.dart';
 import 'orders/orders_screen.dart';
 import 'profile/profile_screen.dart';
+import 'admin/admin_dashboard_screen.dart';
 
 class MainShell extends ConsumerStatefulWidget {
   const MainShell({super.key});
@@ -18,23 +19,45 @@ class MainShell extends ConsumerStatefulWidget {
 class _MainShellState extends ConsumerState<MainShell> {
   int _index = 0;
 
-  final _screens = const [HomeScreen(), ProductsScreen(), CartScreen(), OrdersScreen(), ProfileScreen()];
+  final _studentScreens = const [
+    HomeScreen(),
+    ProductsScreen(),
+    CartScreen(),
+    OrdersScreen(),
+    ProfileScreen(),
+  ];
 
   @override
   Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
+
+    // Not logged in → show login
     if (!auth.isLoggedIn) return const LoginScreen();
 
+    // ADMIN → show admin dashboard directly (no bottom nav)
+    if (auth.isAdmin) {
+      return const AdminDashboardScreen();
+    }
+
+    // STUDENT / SELLER → show main student app with bottom nav
     final cartCount = ref.watch(cartItemCountProvider);
 
     return Scaffold(
-      body: IndexedStack(index: _index, children: _screens),
+      body: IndexedStack(index: _index, children: _studentScreens),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
         destinations: [
-          const NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Home'),
-          const NavigationDestination(icon: Icon(Icons.grid_view_outlined), selectedIcon: Icon(Icons.grid_view), label: 'Products'),
+          const NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          const NavigationDestination(
+            icon: Icon(Icons.grid_view_outlined),
+            selectedIcon: Icon(Icons.grid_view),
+            label: 'Products',
+          ),
           NavigationDestination(
             icon: Badge(
               label: Text('$cartCount'),
@@ -44,8 +67,16 @@ class _MainShellState extends ConsumerState<MainShell> {
             selectedIcon: const Icon(Icons.shopping_cart),
             label: 'Cart',
           ),
-          const NavigationDestination(icon: Icon(Icons.receipt_long_outlined), selectedIcon: Icon(Icons.receipt_long), label: 'Orders'),
-          const NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'Profile'),
+          const NavigationDestination(
+            icon: Icon(Icons.receipt_long_outlined),
+            selectedIcon: Icon(Icons.receipt_long),
+            label: 'Orders',
+          ),
+          const NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: 'Profile',
+          ),
         ],
       ),
     );

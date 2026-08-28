@@ -8,15 +8,17 @@ import 'storage_service.dart';
 class AuthResult {
   final bool success;
   final StudentModel? student;
+  final String? role;
   final String? errorMessage;
 
-  const AuthResult.success(this.student)
+  const AuthResult.success(this.student, {this.role = 'BUYER'})
       : success = true,
         errorMessage = null;
 
   const AuthResult.failure(this.errorMessage)
       : success = false,
-        student = null;
+        student = null,
+        role = null;
 }
 
 class AuthService {
@@ -25,112 +27,142 @@ class AuthService {
 
   AuthService(this._apiService, this._storageService);
 
-  static const String demoPassword = 'aau@123';
+  static const String _fallbackPassword = 'aau@123';
   static final RegExp _campusIdPattern = RegExp(r'^UGR/\d{4}/\d{2}$');
 
-  bool isValidCampusIdFormat(String campusId) {
-    return _campusIdPattern.hasMatch(campusId.trim()) || campusId.contains('@');
+  bool isValidCampusIdFormat(String input) {
+    return _campusIdPattern.hasMatch(input.trim()) || input.contains('@');
   }
 
   List<StudentModel>? _cachedStudents;
 
   Future<List<StudentModel>> _loadStudents() async {
     if (_cachedStudents != null) return _cachedStudents!;
-    final raw = await rootBundle.loadString('assets/data/students.json');
-    final list = jsonDecode(raw) as List;
-    _cachedStudents =
-        list.map((e) => StudentModel.fromJson(e as Map<String, dynamic>)).toList();
+    try {
+      final raw = await rootBundle.loadString('assets/data/students.json');
+      final list = jsonDecode(raw) as List;
+      _cachedStudents = list.map((e) => StudentModel.fromJson(e as Map<String, dynamic>)).toList();
+    } catch (_) {
+      _cachedStudents = [];
+    }
     return _cachedStudents!;
   }
 
+  /// Primary login — tries AAU backend first, falls back to local JSON for demo
   Future<AuthResult> login({
     required String campusId,
     required String password,
     required String selectedCampusId,
   }) async {
-    final trimmedId = campusId.trim();
+    final inputTrim = campusId.trim();
+    final passTrim = password.trim();
 
-    // Direct email authentication against AAU backend
-    if (trimmedId.contains('@')) {
-      try {
-        final payload = await _apiService.login(trimmedId, password);
-        final user = payload['user'] as Map<String, dynamic>;
-        final student = StudentModel(
-          studentId: user['id'] as String? ?? 'UGR/0001/24',
-          name: user['username'] as String? ?? 'Student User',
-          campusId: selectedCampusId,
-          department: 'AAU Marketplace',
-          email: user['email'] as String? ?? trimmedId,
-          phone: '+251 91 000 0000',
-          apiUsername: user['username'] as String? ?? 'user',
-          apiPassword: password,
-        );
-
-        await _storageService.saveSession(
-          studentId: student.studentId,
-          name: student.name,
-          campusId: selectedCampusId,
-          department: student.department,
-          email: student.email,
-          phone: student.phone,
-        );
-        await _storageService.saveSelectedCampus(selectedCampusId);
-
-        return AuthResult.success(student);
-      } on ApiException catch (e) {
-        return AuthResult.failure(e.message);
-      } catch (e) {
-        return AuthResult.failure('Authentication failed: $e');
-      }
+    // ── 1. Email login → authenticate directly against backend ──────────────
+    if (inputTrim.contains('@')) {
+      return _loginWithEmail(inputTrim, passTrim, selectedCampusId);
     }
 
-    // Campus ID format validation
-    if (!_campusIdPattern.hasMatch(trimmedId)) {
+    // ── 2. Campus ID format check ─────────────────────────────────────────────
+    if (!_campusIdPattern.hasMatch(inputTrim)) {
       return const AuthResult.failure(
-        'Invalid Campus ID or Email format. Use UGR/1234/24 or your student email.',
+        'Use your AAU email (e.g. buyer01@aau.edu.et) or Campus ID (UGR/1234/24).',
       );
     }
 
-    // Match local student dataset
+    // ── 3. Campus ID → find in local students JSON, then login via backend ───
     final students = await _loadStudents();
-    final matches = students.where((s) => s.studentId == trimmedId).toList();
+    final matches = students.where((s) => s.studentId == inputTrim).toList();
+
     if (matches.isEmpty) {
-      return const AuthResult.failure('No student found with this Campus ID.');
+      // Not in local dataset — try backend with campus ID as username
+      try {
+        return await _loginWithEmail(inputTrim, passTrim, selectedCampusId);
+      } catch (_) {
+        return const AuthResult.failure('No student found with this Campus ID in our system.');
+      }
     }
-    final matchedStudent = matches.first;
 
-    if (password.trim() != demoPassword && password.trim() != 'Admin@123456' && password.trim() != 'Buyer@123456') {
-      return const AuthResult.failure('Incorrect password.');
+    final student = matches.first;
+
+    // Validate password (local demo accepts fixed password)
+    if (passTrim != _fallbackPassword &&
+        passTrim != 'Buyer@123456' &&
+        passTrim != 'Seller@123456' &&
+        passTrim != 'Admin@123456') {
+      return const AuthResult.failure('Incorrect password. Demo password: aau@123');
     }
 
-    if (matchedStudent.campusId != selectedCampusId) {
-      return const AuthResult.failure(
-        'Selected campus does not match your registered campus.',
+    if (student.campusId != selectedCampusId) {
+      return const AuthResult.failure('Selected campus does not match your registered campus.');
+    }
+
+    // Authenticate against backend using their email
+    String backendRole = 'BUYER';
+    try {
+      final payload = await _apiService.login(student.email, 'Buyer@123456');
+      final user = payload['user'] as Map<String, dynamic>?;
+      backendRole = user?['role'] as String? ?? 'BUYER';
+    } catch (_) {
+      // Fallback: save demo token so app still works offline
+      await _storageService.saveAuthToken(
+        'demo_${student.studentId}',
+        role: 'BUYER',
       );
     }
 
+    await _storageService.saveSession(
+      studentId: student.studentId,
+      name: student.name,
+      campusId: student.campusId,
+      department: student.department,
+      email: student.email,
+      phone: student.phone,
+    );
+    await _storageService.saveSelectedCampus(selectedCampusId);
+
+    return AuthResult.success(student, role: backendRole);
+  }
+
+  Future<AuthResult> _loginWithEmail(
+    String email,
+    String password,
+    String selectedCampusId,
+  ) async {
     try {
-      // Try logging in to AAU backend with student email or fallback to student login
-      try {
-        await _apiService.login(matchedStudent.email, 'Buyer@123456');
-      } catch (_) {
-        // Fallback demo token
-        await _storageService.saveAuthToken('demo_token_${matchedStudent.studentId}', role: 'BUYER');
-      }
+      final payload = await _apiService.login(email, password);
+      final user = payload['user'] as Map<String, dynamic>;
+      final role = user['role'] as String? ?? 'BUYER';
+
+      final student = StudentModel(
+        studentId: user['id'] as String? ?? email,
+        name: user['username'] as String? ?? email.split('@').first,
+        campusId: selectedCampusId,
+        department: role == 'ADMIN'
+            ? 'AAU Marketplace Admin'
+            : role == 'SELLER'
+                ? 'AAU Seller'
+                : 'AAU Student',
+        email: user['email'] as String? ?? email,
+        phone: '+251 91 000 0000',
+        apiUsername: user['username'] as String? ?? '',
+        apiPassword: password,
+      );
 
       await _storageService.saveSession(
-        studentId: matchedStudent.studentId,
-        name: matchedStudent.name,
-        campusId: matchedStudent.campusId,
-        department: matchedStudent.department,
-        email: matchedStudent.email,
-        phone: matchedStudent.phone,
+        studentId: student.studentId,
+        name: student.name,
+        campusId: selectedCampusId,
+        department: student.department,
+        email: student.email,
+        phone: student.phone,
       );
       await _storageService.saveSelectedCampus(selectedCampusId);
 
-      return AuthResult.success(matchedStudent);
+      return AuthResult.success(student, role: role);
+    } on ApiException catch (e) {
+      return AuthResult.failure(e.message);
     } catch (e) {
-      return const AuthResult.failure('Authentication failed. Please try again.');
+      return AuthResult.failure('Login failed. Check your email and password.');
     }
   }
 
