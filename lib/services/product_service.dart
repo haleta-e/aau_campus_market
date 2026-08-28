@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/product_model.dart';
-import '../utils/constants.dart';
 import 'api_service.dart';
 import 'storage_service.dart';
 
@@ -21,13 +20,15 @@ class ProductService {
 
   Future<void> _seedLocalProductsIfNeeded() async {
     if (!_storageService.isEmpty(StorageService.productsBox)) return;
-    final raw = await rootBundle.loadString('assets/data/local_products.json');
-    final list = (jsonDecode(raw) as List).cast<Map<String, dynamic>>();
-    await _storageService.seedIfEmpty(
-      StorageService.productsBox,
-      list,
-      (item) => item['id'] as String,
-    );
+    try {
+      final raw = await rootBundle.loadString('assets/data/local_products.json');
+      final list = (jsonDecode(raw) as List).cast<Map<String, dynamic>>();
+      await _storageService.seedIfEmpty(
+        StorageService.productsBox,
+        list,
+        (item) => item['id'] as String,
+      );
+    } catch (_) {}
   }
 
   Future<List<ProductModel>> getLocalProducts() async {
@@ -36,20 +37,25 @@ class ProductService {
     return raw.map((e) => ProductModel.fromJson(e)).toList();
   }
 
- Future<List<ProductModel>> getApiProducts() async {
-    final products = await _apiService.getProducts();
-    return products.where((p) => !_isExcludedFromMarketplace(p)).toList();
+  Future<List<ProductModel>> getBackendProducts() async {
+    try {
+      return await _apiService.getProducts();
+    } catch (e) {
+      return [];
+    }
   }
 
-  bool _isExcludedFromMarketplace(ProductModel product) {
-    final title = product.name.toLowerCase();
-    return AppConstants.excludedApiKeywords.any((k) => title.contains(k.toLowerCase()));
-  }
-
-  /// The unified marketplace: local + API products together.
+  /// Unified marketplace: fetches live from AAU backend, falling back to local dataset if offline
   Future<List<ProductModel>> getAllProducts() async {
-    final results = await Future.wait([getLocalProducts(), getApiProducts()]);
-    return [...results[0], ...results[1]];
+    try {
+      final backendProducts = await getBackendProducts();
+      if (backendProducts.isNotEmpty) {
+        return backendProducts;
+      }
+    } catch (_) {}
+
+    // Fallback to local products if backend is not reachable
+    return getLocalProducts();
   }
 
   List<String> getUnifiedCategories(List<ProductModel> products) {
@@ -62,9 +68,9 @@ class ProductService {
   }
 
   List<ProductModel> filterByCampus(List<ProductModel> products, String? campusId) {
-    if (campusId == null) return products;
+    if (campusId == null || campusId.isEmpty) return products;
     return products.where((p) {
-      if (p.isFromApi) return true; // API products are campus-agnostic
+      if (p.availableCampuses.isEmpty) return true;
       return p.availableCampuses.contains(campusId);
     }).toList();
   }
@@ -77,10 +83,10 @@ class ProductService {
   List<ProductModel> search(List<ProductModel> products, String query) {
     if (query.trim().isEmpty) return products;
     final lower = query.trim().toLowerCase();
-    return products.where((p) => p.name.toLowerCase().contains(lower)).toList();
+    return products.where((p) => p.name.toLowerCase().contains(lower) || p.description.toLowerCase().contains(lower)).toList();
   }
 
-  // ---- Admin CRUD (local products only) ----
+  // ---- Admin CRUD ----
 
   Future<void> createLocalProduct(ProductModel product) async {
     await _seedLocalProductsIfNeeded();
@@ -88,16 +94,10 @@ class ProductService {
   }
 
   Future<void> updateLocalProduct(ProductModel product) async {
-    if (product.isFromApi) {
-      throw ProductServiceException('Fake Store API products are read-only.');
-    }
     await _storageService.putItem(StorageService.productsBox, product.id, product.toJson());
   }
 
   Future<void> deleteLocalProduct(String productId) async {
-    if (productId.startsWith('api_')) {
-      throw ProductServiceException('Fake Store API products cannot be deleted.');
-    }
     await _storageService.deleteItem(StorageService.productsBox, productId);
   }
 }

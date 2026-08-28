@@ -59,6 +59,27 @@ class ProductModel {
     );
   }
 
+  /// Maps a product from the AAU Node.js/PostgreSQL backend API
+  factory ProductModel.fromBackendJson(Map<String, dynamic> json) {
+    final sellerId = json['seller_id'] as String? ?? '';
+    final rawPrice = json['price'];
+    final priceVal = rawPrice is num ? rawPrice.toDouble() : double.tryParse(rawPrice.toString()) ?? 0.0;
+    return ProductModel(
+      id: json['id'] as String? ?? '',
+      name: json['name'] as String? ?? 'Product',
+      category: json['category'] as String? ?? 'General',
+      description: json['description'] as String? ?? '',
+      price: priceVal,
+      image: json['image_url'] as String? ?? 'https://placehold.co/400x400/png?text=Product',
+      stockQuantity: json['stock_quantity'] as int? ?? 10,
+      availableCampuses: const ['Main Campus', '4 Kilo', '5 Kilo', '6 Kilo', 'FBE', 'Black Lion'],
+      sellerIds: sellerId.isNotEmpty ? [sellerId] : const [],
+      discountId: null,
+      isAvailable: (json['status'] as String?) == 'ACTIVE',
+      source: ProductSource.local,
+    );
+  }
+
   /// Maps a raw Fake Store API product response into the unified model.
   /// API products have no campus/seller — they're available marketplace-wide.
   factory ProductModel.fromApiJson(Map<String, dynamic> json) {

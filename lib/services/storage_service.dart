@@ -22,6 +22,9 @@ class StorageService {
   static const String _keyIsLoggedIn = 'session_is_logged_in';
   static const String _keySelectedCampus = 'selected_campus_id';
   static const String _keyIsAdmin = 'is_admin_logged_in';
+  static const String _keyAuthToken = 'auth_jwt_token';
+  static const String _keyRefreshToken = 'auth_refresh_token';
+  static const String _keyUserRole = 'auth_user_role';
 
   Future<void> openBoxes() async {
     await Future.wait([
@@ -161,6 +164,37 @@ class StorageService {
   Future<bool> isAdminLoggedIn() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_keyIsAdmin) ?? false;
+  }
+
+  // ---- JWT Token Storage ----
+
+  Future<void> saveAuthToken(String token, {String? refreshToken, String? role}) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyAuthToken, token);
+    if (refreshToken != null) await prefs.setString(_keyRefreshToken, refreshToken);
+    if (role != null) await prefs.setString(_keyUserRole, role);
+  }
+
+  Future<String?> getAuthToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyAuthToken);
+  }
+
+  Future<String?> getRefreshToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyRefreshToken);
+  }
+
+  Future<String?> getUserRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyUserRole);
+  }
+
+  Future<void> clearAuthToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_keyAuthToken);
+    await prefs.remove(_keyRefreshToken);
+    await prefs.remove(_keyUserRole);
   }
 }
 
