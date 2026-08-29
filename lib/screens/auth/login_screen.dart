@@ -9,16 +9,33 @@ class LoginScreen extends ConsumerStatefulWidget {
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final _idController = TextEditingController();
-  final _passwordController = TextEditingController();
+class _LoginScreenState extends ConsumerState<LoginScreen> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  // Student Controllers
+  final _studentIdController = TextEditingController();
+  final _studentPasswordController = TextEditingController();
   String? _selectedCampusId;
-  bool _obscure = true;
+  bool _obscureStudentPass = true;
+
+  // Admin Controllers
+  final _adminEmailController = TextEditingController(text: 'admin@aau.edu.et');
+  final _adminPasswordController = TextEditingController(text: 'Admin@123456');
+  bool _obscureAdminPass = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
 
   @override
   void dispose() {
-    _idController.dispose();
-    _passwordController.dispose();
+    _tabController.dispose();
+    _studentIdController.dispose();
+    _studentPasswordController.dispose();
+    _adminEmailController.dispose();
+    _adminPasswordController.dispose();
     super.dispose();
   }
 
@@ -30,178 +47,244 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            const SizedBox(height: 20),
-            // Logo + title
-            Column(children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2E7D32).withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.storefront, size: 56, color: Color(0xFF2E7D32)),
-              ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
               const SizedBox(height: 12),
-              const Text(
-                'AAU Campus Market',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                'Login with your AAU account',
-                style: TextStyle(color: Colors.grey, fontSize: 14),
-              ),
-            ]),
-            const SizedBox(height: 36),
-
-            // Email or Campus ID field
-            TextField(
-              controller: _idController,
-              keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
-                labelText: 'Email or Campus ID',
-                hintText: 'buyer01@aau.edu.et  or  UGR/1234/24',
-                prefixIcon: Icon(Icons.badge_outlined),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Password
-            TextField(
-              controller: _passwordController,
-              obscureText: _obscure,
-              decoration: InputDecoration(
-                labelText: 'Password',
-                prefixIcon: const Icon(Icons.lock_outline),
-                suffixIcon: IconButton(
-                  icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),
-                  onPressed: () => setState(() => _obscure = !_obscure),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Campus dropdown
-            DropdownButtonFormField<String>(
-              value: _selectedCampusId,
-              decoration: const InputDecoration(
-                labelText: 'Campus',
-                prefixIcon: Icon(Icons.location_on_outlined),
-              ),
-              items: campusState.campuses
-                  .map((c) => DropdownMenuItem(value: c.id, child: Text(c.name)))
-                  .toList(),
-              onChanged: (v) => setState(() => _selectedCampusId = v),
-            ),
-
-            // Error
-            if (auth.errorMessage != null) ...[
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.red.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  auth.errorMessage!,
-                  style: const TextStyle(color: Colors.red, fontSize: 13),
-                ),
-              ),
-            ],
-            const SizedBox(height: 24),
-
-            // Login button
-            ElevatedButton(
-              onPressed: auth.isLoading
-                  ? null
-                  : () async {
-                      if (_selectedCampusId == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Please select your campus.')),
-                        );
-                        return;
-                      }
-                      await ref.read(authProvider.notifier).login(
-                            campusId: _idController.text,
-                            password: _passwordController.text,
-                            selectedCampusId: _selectedCampusId!,
-                          );
-                    },
-              child: auth.isLoading
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                    )
-                  : const Text('Login', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            ),
-            const SizedBox(height: 24),
-
-            // Demo credentials hint card
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: Colors.grey.withValues(alpha: 0.07),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
-                    'Demo Accounts (AAU Backend)',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              // App Logo & Header
+              Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2E7D32).withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.storefront, size: 52, color: Color(0xFF2E7D32)),
                   ),
-                  SizedBox(height: 8),
-                  _DemoRow(label: 'Admin', email: 'admin@aau.edu.et', password: 'Admin@123456'),
-                  _DemoRow(label: 'Seller', email: 'seller01@aau.edu.et', password: 'Seller@123456'),
-                  _DemoRow(label: 'Buyer', email: 'buyer01@aau.edu.et', password: 'Buyer@123456'),
-                  Divider(height: 16),
-                  Text(
-                    'Local Demo (Campus ID)',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'AAU Campus Market',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 4),
-                  Text(
-                    'Any Campus ID from students.json + password: aau@123',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Addis Ababa University Official Portal',
+                    style: TextStyle(color: Colors.grey, fontSize: 13),
                   ),
                 ],
               ),
-            ),
-          ]),
-        ),
-      ),
-    );
-  }
-}
+              const SizedBox(height: 28),
 
-class _DemoRow extends StatelessWidget {
-  final String label;
-  final String email;
-  final String password;
+              // Tab Selector: Student vs Admin
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: TabBar(
+                  controller: _tabController,
+                  indicator: BoxDecoration(
+                    color: const Color(0xFF2E7D32),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  labelColor: Colors.white,
+                  unselectedLabelColor: Colors.grey.shade700,
+                  labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  tabs: const [
+                    Tab(icon: Icon(Icons.school, size: 20), text: 'Student Login'),
+                    Tab(icon: Icon(Icons.admin_panel_settings, size: 20), text: 'Admin Portal'),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
 
-  const _DemoRow({required this.label, required this.email, required this.password});
+              // Error display
+              if (auth.errorMessage != null) ...[
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.red.withValues(alpha: 0.2)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          auth.errorMessage!,
+                          style: const TextStyle(color: Colors.red, fontSize: 13),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
 
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(children: [
-        SizedBox(
-          width: 48,
-          child: Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.grey)),
-        ),
-        Expanded(
-          child: Text(
-            '$email  /  $password',
-            style: const TextStyle(fontSize: 11, color: Colors.grey),
+              // Tab Views
+              SizedBox(
+                height: 340,
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    // --- STUDENT TAB ---
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Text(
+                          'AAU Registered Students Only',
+                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.grey),
+                        ),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: _studentIdController,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: const InputDecoration(
+                            labelText: 'Campus ID or Student Email',
+                            hintText: 'e.g. UGR/1234/24 or student@aau.edu.et',
+                            prefixIcon: Icon(Icons.badge_outlined),
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: _studentPasswordController,
+                          obscureText: _obscureStudentPass,
+                          decoration: InputDecoration(
+                            labelText: 'Password',
+                            prefixIcon: const Icon(Icons.lock_outline),
+                            border: const OutlineInputBorder(),
+                            isDense: true,
+                            suffixIcon: IconButton(
+                              icon: Icon(_obscureStudentPass ? Icons.visibility_off : Icons.visibility),
+                              onPressed: () => setState(() => _obscureStudentPass = !_obscureStudentPass),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        DropdownButtonFormField<String>(
+                          value: _selectedCampusId,
+                          decoration: const InputDecoration(
+                            labelText: 'Select AAU Campus',
+                            prefixIcon: Icon(Icons.location_on_outlined),
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                          ),
+                          items: campusState.campuses
+                              .map((c) => DropdownMenuItem(value: c.id, child: Text(c.name)))
+                              .toList(),
+                          onChanged: (v) => setState(() => _selectedCampusId = v),
+                        ),
+                        const SizedBox(height: 20),
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            backgroundColor: const Color(0xFF2E7D32),
+                            foregroundColor: Colors.white,
+                          ),
+                          onPressed: auth.isLoading
+                              ? null
+                              : () async {
+                                  if (_selectedCampusId == null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Please select your AAU campus.')),
+                                    );
+                                    return;
+                                  }
+                                  await ref.read(authProvider.notifier).login(
+                                        campusId: _studentIdController.text,
+                                        password: _studentPasswordController.text,
+                                        selectedCampusId: _selectedCampusId!,
+                                      );
+                                },
+                          icon: auth.isLoading
+                              ? const SizedBox(
+                                  height: 18,
+                                  width: 18,
+                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                )
+                              : const Icon(Icons.login),
+                          label: const Text('Student Sign In', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        ),
+                      ],
+                    ),
+
+                    // --- ADMIN TAB ---
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Text(
+                          'AAU Administrator Access',
+                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.grey),
+                        ),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: _adminEmailController,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: const InputDecoration(
+                            labelText: 'Administrator Email',
+                            hintText: 'admin@aau.edu.et',
+                            prefixIcon: Icon(Icons.admin_panel_settings_outlined),
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: _adminPasswordController,
+                          obscureText: _obscureAdminPass,
+                          decoration: InputDecoration(
+                            labelText: 'Admin Password',
+                            prefixIcon: const Icon(Icons.lock_outline),
+                            border: const OutlineInputBorder(),
+                            isDense: true,
+                            suffixIcon: IconButton(
+                              icon: Icon(_obscureAdminPass ? Icons.visibility_off : Icons.visibility),
+                              onPressed: () => setState(() => _obscureAdminPass = !_obscureAdminPass),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            backgroundColor: Colors.blueGrey.shade800,
+                            foregroundColor: Colors.white,
+                          ),
+                          onPressed: auth.isLoading
+                              ? null
+                              : () async {
+                                  // Default to Main Campus if none selected
+                                  final campus = campusState.campuses.isNotEmpty ? campusState.campuses.first.id : 'main_campus';
+                                  await ref.read(authProvider.notifier).login(
+                                        campusId: _adminEmailController.text,
+                                        password: _adminPasswordController.text,
+                                        selectedCampusId: campus,
+                                      );
+                                },
+                          icon: auth.isLoading
+                              ? const SizedBox(
+                                  height: 18,
+                                  width: 18,
+                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                )
+                              : const Icon(Icons.security),
+                          label: const Text('Admin Dashboard Login', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
-      ]),
+      ),
     );
   }
 }
