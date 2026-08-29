@@ -1,40 +1,21 @@
-# ─── Stage 1: Build Stage ──────────────────────────────────────────────────
-FROM node:20-alpine AS builder
+# Use lightweight Node 20 Alpine image
+FROM node:20-alpine
 
-WORKDIR /app/backend
+# Set working directory inside container
+WORKDIR /app
 
-# Install dependencies first for layer caching
-COPY backend/package*.json ./
-RUN npm ci
-
-# Copy TypeScript code and assets
-COPY backend/tsconfig.json backend/drizzle.config.ts ./
-COPY backend/src/ ./src/
-COPY backend/drizzle/ ./drizzle/
-COPY backend/public/ ./public/
-
-# Build TypeScript
-RUN npm run build
-
-# ─── Stage 2: Production Runtime ──────────────────────────────────────────
-FROM node:20-alpine AS runner
-
-WORKDIR /app/backend
-
-ENV NODE_ENV=production
-ENV PORT=4000
+# Copy dependency manifests first to leverage Docker layer caching
+COPY backend/package*.json ./backend/
 
 # Install production dependencies only
-COPY backend/package*.json ./
-RUN npm ci --omit=dev && npm cache clean --force
+WORKDIR /app/backend
+RUN npm ci --omit=dev
 
-# Copy build artifacts and assets
-COPY --from=builder /app/backend/dist ./dist
-COPY --from=builder /app/backend/drizzle ./drizzle
-COPY --from=builder /app/backend/public ./public
-COPY --from=builder /app/backend/drizzle.config.ts ./
-COPY --from=builder /app/backend/package.json ./
+# Copy backend source code
+COPY backend/ ./
 
+# Expose server port
 EXPOSE 4000
 
-CMD ["node", "dist/server.js"]
+# Start Express server
+CMD ["node", "src/server.js"]
