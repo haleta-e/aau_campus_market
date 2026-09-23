@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_provider.dart';
-import '../../providers/campus_provider.dart';
 import '../../providers/seller_provider.dart';
 import '../../providers/product_provider.dart';
 import '../../providers/admin_provider.dart';
 import '../../providers/order_provider.dart';
-import '../../providers/discount_provider.dart';
 import '../../models/product_model.dart';
 import '../../models/seller_model.dart';
-import '../../models/discount_model.dart';
+import '../../models/order_model.dart';
 import '../../services/complaint_service.dart';
 import '../../models/complaint_model.dart';
 import '../../utils/formatters.dart';
@@ -37,8 +35,8 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
             tooltip: 'Refresh All Data',
             onPressed: () {
               ref.read(adminAuthProvider.notifier).fetchStats();
-              ref.read(productProvider.notifier).refresh();
-              ref.read(orderProvider.notifier).refresh();
+              ref.read(productProvider.notifier).loadProducts();
+              ref.read(orderProvider.notifier).loadOrders();
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Refreshing admin portal data...'), duration: Duration(seconds: 1)),
               );
@@ -115,11 +113,11 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.blue.shade200),
             ),
-            child: Row(
+            child: const Row(
               children: [
-                const Icon(Icons.verified_user, color: Colors.blue, size: 28),
-                const SizedBox(width: 12),
-                const Expanded(
+                Icon(Icons.verified_user, color: Colors.blue, size: 28),
+                SizedBox(width: 12),
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -246,7 +244,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
               TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Product Name')),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                value: category,
+                initialValue: category,
                 decoration: const InputDecoration(labelText: 'Category'),
                 items: const [
                   DropdownMenuItem(value: 'Electronics', child: Text('Electronics')),
@@ -285,7 +283,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                 isAvailable: true,
                 source: ProductSource.local,
               );
-              await ref.read(productProvider.notifier).addProduct(newProduct);
+              await ref.read(productProvider.notifier).createLocalProduct(newProduct);
               if (ctx.mounted) Navigator.pop(ctx);
             },
             child: const Text('Add Product'),
@@ -319,7 +317,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                 price: double.tryParse(priceCtrl.text) ?? product.price,
                 stockQuantity: int.tryParse(stockCtrl.text) ?? product.stockQuantity,
               );
-              await ref.read(productProvider.notifier).updateProduct(updated);
+              await ref.read(productProvider.notifier).updateLocalProduct(updated);
               if (ctx.mounted) Navigator.pop(ctx);
             },
             child: const Text('Save'),
@@ -330,7 +328,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
   }
 
   Future<void> _deleteProduct(String productId) async {
-    await ref.read(productProvider.notifier).deleteProduct(productId);
+    await ref.read(productProvider.notifier).deleteLocalProduct(productId);
   }
 
   // ==========================================
@@ -359,9 +357,9 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
               ),
               title: Text(s.$1, style: const TextStyle(fontWeight: FontWeight.bold)),
               subtitle: Text('${s.$2} • ${s.$3} (${s.$4})'),
-              trailing: Chip(
-                label: const Text('Registered Student', style: TextStyle(fontSize: 11, color: Colors.white)),
-                backgroundColor: const Color(0xFF2E7D32),
+              trailing: const Chip(
+                label: Text('Registered Student', style: TextStyle(fontSize: 11, color: Colors.white)),
+                backgroundColor: Color(0xFF2E7D32),
               ),
             ),
           );
@@ -398,9 +396,9 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
               subtitle: Text('${s.department} • Phone: ${s.phone}'),
               trailing: Switch(
                 value: s.active,
-                activeColor: Colors.purple,
+                activeThumbColor: Colors.purple,
                 onChanged: (val) {
-                  ref.read(sellerProvider.notifier).toggleActive(s.id);
+                  ref.read(sellerProvider.notifier).updateSeller(s.copyWith(active: val));
                 },
               ),
             ),
@@ -437,15 +435,16 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
               final newSeller = SellerModel(
                 id: 'seller_${DateTime.now().millisecondsSinceEpoch}',
                 name: nameCtrl.text.trim(),
+                studentId: 'UGR/0000/16',
+                gender: 'M',
                 department: deptCtrl.text.trim().isNotEmpty ? deptCtrl.text.trim() : 'AAU Campus Store',
                 campusId: 'main_campus',
-                email: 'seller@aau.edu.et',
                 phone: phoneCtrl.text.trim().isNotEmpty ? phoneCtrl.text.trim() : '+251 91 100 2030',
                 image: 'assets/images/default_seller.png',
                 active: true,
                 rating: 4.8,
               );
-              await ref.read(sellerProvider.notifier).addSeller(newSeller);
+              await ref.read(sellerProvider.notifier).createSeller(newSeller);
               if (ctx.mounted) Navigator.pop(ctx);
             },
             child: const Text('Save Seller'),
