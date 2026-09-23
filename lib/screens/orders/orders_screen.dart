@@ -5,6 +5,7 @@ import '../../providers/campus_provider.dart';
 import '../../providers/seller_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/order_model.dart';
+import '../../models/seller_model.dart';
 import '../../services/complaint_service.dart';
 import '../../widgets/loading_widget.dart';
 import '../../widgets/empty_state.dart';
@@ -56,7 +57,7 @@ class OrdersScreen extends ConsumerWidget {
                         ),
                         title: Text(order.orderId, style: const TextStyle(fontWeight: FontWeight.bold)),
                         subtitle: Text(
-                          '${Formatters.date(order.orderDate)} • ${isPickup ? "Pickup" : "Delivery"}\nStatus: ${isDelivered ? "Delivered & Confirmed" : "Order Placed / Awaiting Delivery"}',
+                          '${Formatters.date(order.orderDate)} • ${isPickup ? "Campus Pickup" : "Delivery"}\nStatus: ${isDelivered ? "Completed" : isPickup ? "Ready for Pickup" : "Awaiting Delivery"}',
                         ),
                         isThreeLine: true,
                         trailing: Text(Formatters.currency(order.total), style: const TextStyle(fontWeight: FontWeight.bold)),
@@ -68,17 +69,23 @@ class OrdersScreen extends ConsumerWidget {
     );
   }
 
-  void _showOrderDetail(BuildContext context, WidgetRef ref, OrderModel order, List campuses, List sellers) {
+  void _showOrderDetail(BuildContext context, WidgetRef ref, OrderModel order, List campuses, List<SellerModel> sellers) {
     final isPickup = order.fulfillmentMethod == 'pickup';
     final campusName = campuses.where((c) => c.id == order.campusId).map((c) => c.name).firstOrNull ?? '';
-    final orderSellers = sellers.where((s) => order.sellerIds.contains(s.id)).toList();
     final isDelivered = order.status == OrderStatus.delivered;
+
+    // Specific seller for this order
+    final specificSellerId = order.sellerIds.isNotEmpty ? order.sellerIds.first : '';
+    final specificSeller = sellers.where((s) => s.id == specificSellerId).firstOrNull ??
+        (sellers.isNotEmpty ? sellers.first : null);
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       builder: (_) => DraggableScrollableSheet(
         initialChildSize: 0.8,
+        minChildSize: 0.5,
         maxChildSize: 0.95,
         expand: false,
         builder: (context, scrollController) => ListView(
@@ -91,24 +98,58 @@ class OrdersScreen extends ConsumerWidget {
               ),
               Chip(
                 avatar: Icon(isDelivered ? Icons.check_circle : (isPickup ? Icons.storefront : Icons.local_shipping), size: 16, color: Colors.white),
-                label: Text(isDelivered ? 'Delivered' : 'Awaiting Delivery', style: const TextStyle(color: Colors.white)),
-                backgroundColor: isDelivered ? Colors.green : Colors.blue.shade700,
+                label: Text(isDelivered ? 'Completed' : isPickup ? 'Pickup' : 'Awaiting Delivery', style: const TextStyle(color: Colors.white)),
+                backgroundColor: isDelivered ? Colors.green : isPickup ? Colors.orange.shade700 : Colors.blue.shade700,
               ),
             ]),
             const SizedBox(height: 4),
             Text('${Formatters.date(order.orderDate)} • $campusName', style: const TextStyle(color: Colors.grey)),
             const Divider(height: 24),
 
-            // Seller Info
-            if (orderSellers.isNotEmpty) ...[
-              const Text('Seller Information', style: TextStyle(fontWeight: FontWeight.bold)),
+            // Specific Seller Info with Rating
+            if (specificSeller != null) ...[
+              const Text('Order Seller', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
               const SizedBox(height: 6),
-              ...orderSellers.map((s) => ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: CircleAvatar(backgroundColor: Colors.purple.shade100, child: const Icon(Icons.store, color: Colors.purple)),
-                    title: Text(s.name, style: const TextStyle(fontWeight: FontWeight.w600)),
-                    subtitle: Text('${s.department} • ${s.phone}'),
-                  )),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.purple.shade50,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.purple.shade200),
+                ),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: Colors.purple.shade100,
+                      child: const Icon(Icons.store, color: Colors.purple),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(specificSeller.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                          Text('${specificSeller.department} • Phone: ${specificSeller.phone}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.shade100,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.star, size: 16, color: Colors.amber),
+                          const SizedBox(width: 4),
+                          Text('${specificSeller.rating}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const Divider(height: 24),
             ],
 
@@ -136,10 +177,10 @@ class OrdersScreen extends ConsumerWidget {
             _row('Total Paid', Formatters.currency(order.total), bold: true),
             const SizedBox(height: 8),
             _row('Payment Method', order.paymentMethod),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
-            // Buyer Delivery Confirmation Action
-            if (!isDelivered)
+            // Delivery Confirmation (Only for Delivery orders, NOT for Pickup)
+            if (!isPickup && !isDelivered) ...[
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2E7D32),
@@ -156,8 +197,25 @@ class OrdersScreen extends ConsumerWidget {
                 icon: const Icon(Icons.check_circle_outline),
                 label: const Text('Confirm Item Received / Delivered', style: TextStyle(fontWeight: FontWeight.bold)),
               ),
+              const SizedBox(height: 10),
+            ],
 
-            const SizedBox(height: 12),
+            // Rate Seller Button (For both Pickup and Delivery orders)
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.amber.shade900,
+                side: BorderSide(color: Colors.amber.shade800),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+                _showRatingDialog(context, specificSeller?.name ?? 'Seller');
+              },
+              icon: const Icon(Icons.star_outline),
+              label: const Text('Rate Seller & Service'),
+            ),
+            const SizedBox(height: 10),
+
             // Report Complaint / Issue Button
             OutlinedButton.icon(
               style: OutlinedButton.styleFrom(
@@ -171,6 +229,63 @@ class OrdersScreen extends ConsumerWidget {
               },
               icon: const Icon(Icons.report_problem_outlined),
               label: const Text('Report Issue / File Complaint'),
+            ),
+            const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showRatingDialog(BuildContext context, String sellerName) {
+    int rating = 5;
+    final reviewCtrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text('Rate $sellerName'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(5, (index) {
+                  final starIndex = index + 1;
+                  return IconButton(
+                    icon: Icon(
+                      starIndex <= rating ? Icons.star : Icons.star_border,
+                      color: Colors.amber,
+                      size: 32,
+                    ),
+                    onPressed: () => setDialogState(() => rating = starIndex),
+                  );
+                }),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: reviewCtrl,
+                maxLines: 2,
+                decoration: const InputDecoration(
+                  labelText: 'Review comment (optional)',
+                  hintText: 'Share your feedback about the seller...',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.amber.shade800, foregroundColor: Colors.white),
+              onPressed: () {
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Rating ($rating Stars) submitted for $sellerName!')),
+                );
+              },
+              child: const Text('Submit Rating'),
             ),
           ],
         ),
@@ -193,7 +308,7 @@ class OrdersScreen extends ConsumerWidget {
             Text('Order: ${order.orderId}', style: const TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: issueType,
+              initialValue: issueType,
               decoration: const InputDecoration(labelText: 'Issue Category', border: OutlineInputBorder()),
               items: const [
                 DropdownMenuItem(value: 'Improper Product', child: Text('Improper / Damaged Product')),

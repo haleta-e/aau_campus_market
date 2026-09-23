@@ -231,64 +231,90 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
     final priceCtrl = TextEditingController();
     final stockCtrl = TextEditingController(text: '10');
     final descCtrl = TextEditingController();
+    final imageCtrl = TextEditingController(text: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500');
     String category = 'Electronics';
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Add New Product'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Product Name')),
-              const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
-                initialValue: category,
-                decoration: const InputDecoration(labelText: 'Category'),
-                items: const [
-                  DropdownMenuItem(value: 'Electronics', child: Text('Electronics')),
-                  DropdownMenuItem(value: 'Books & Stationery', child: Text('Books & Stationery')),
-                  DropdownMenuItem(value: 'Fashion', child: Text('Fashion')),
-                  DropdownMenuItem(value: 'Dorm & Living', child: Text('Dorm & Living')),
-                  DropdownMenuItem(value: 'Sports & Gear', child: Text('Sports & Gear')),
-                ],
-                onChanged: (v) => category = v!,
-              ),
-              const SizedBox(height: 8),
-              TextField(controller: priceCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Price (ETB)')),
-              const SizedBox(height: 8),
-              TextField(controller: stockCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Stock Quantity')),
-              const SizedBox(height: 8),
-              TextField(controller: descCtrl, decoration: const InputDecoration(labelText: 'Description')),
-            ],
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Add New Product'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Product Name')),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<String>(
+                  initialValue: category,
+                  decoration: const InputDecoration(labelText: 'Category'),
+                  items: const [
+                    DropdownMenuItem(value: 'Electronics', child: Text('Electronics')),
+                    DropdownMenuItem(value: 'Books & Stationery', child: Text('Books & Stationery')),
+                    DropdownMenuItem(value: 'Fashion', child: Text('Fashion')),
+                    DropdownMenuItem(value: 'Dorm & Living', child: Text('Dorm & Living')),
+                    DropdownMenuItem(value: 'Sports & Gear', child: Text('Sports & Gear')),
+                  ],
+                  onChanged: (v) => category = v!,
+                ),
+                const SizedBox(height: 8),
+                TextField(controller: priceCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Price (ETB)')),
+                const SizedBox(height: 8),
+                TextField(controller: stockCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Stock Quantity')),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: imageCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Image URL or Asset Path',
+                    hintText: 'https://... or assets/images/...',
+                    prefixIcon: Icon(Icons.image_outlined),
+                  ),
+                  onChanged: (_) => setDialogState(() {}),
+                ),
+                const SizedBox(height: 8),
+                // Live Image Preview Box
+                if (imageCtrl.text.isNotEmpty)
+                  Container(
+                    height: 80,
+                    width: 80,
+                    margin: const EdgeInsets.only(top: 8),
+                    decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(8)),
+                    child: imageCtrl.text.startsWith('http')
+                        ? Image.network(imageCtrl.text, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.broken_image))
+                        : Image.asset(imageCtrl.text, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.broken_image)),
+                  ),
+                const SizedBox(height: 8),
+                TextField(controller: descCtrl, decoration: const InputDecoration(labelText: 'Description')),
+              ],
+            ),
           ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+            ElevatedButton(
+              onPressed: () async {
+                if (nameCtrl.text.trim().isEmpty || priceCtrl.text.trim().isEmpty) return;
+                final imgUrl = imageCtrl.text.trim().isNotEmpty ? imageCtrl.text.trim() : 'https://placehold.co/400x400/png?text=Product';
+                final newProduct = ProductModel(
+                  id: 'prod_${DateTime.now().millisecondsSinceEpoch}',
+                  name: nameCtrl.text.trim(),
+                  category: category,
+                  description: descCtrl.text.trim(),
+                  price: double.tryParse(priceCtrl.text) ?? 0.0,
+                  image: imgUrl,
+                  stockQuantity: int.tryParse(stockCtrl.text) ?? 10,
+                  availableCampuses: const ['main_campus', '4_kilo', '5_kilo', '6_kilo', 'fbe', 'black_lion'],
+                  sellerIds: const ['s1'],
+                  discountId: null,
+                  isAvailable: true,
+                  source: ProductSource.local,
+                );
+                await ref.read(productProvider.notifier).createLocalProduct(newProduct);
+                if (ctx.mounted) Navigator.pop(ctx);
+              },
+              child: const Text('Add Product'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () async {
-              if (nameCtrl.text.trim().isEmpty || priceCtrl.text.trim().isEmpty) return;
-              final newProduct = ProductModel(
-                id: 'prod_${DateTime.now().millisecondsSinceEpoch}',
-                name: nameCtrl.text.trim(),
-                category: category,
-                description: descCtrl.text.trim(),
-                price: double.tryParse(priceCtrl.text) ?? 0.0,
-                image: 'assets/images/default_product.png',
-                stockQuantity: int.tryParse(stockCtrl.text) ?? 10,
-                availableCampuses: const ['main_campus', '4_kilo', '5_kilo', '6_kilo', 'fbe', 'black_lion'],
-                sellerIds: const ['s1'],
-                discountId: null,
-                isAvailable: true,
-                source: ProductSource.local,
-              );
-              await ref.read(productProvider.notifier).createLocalProduct(newProduct);
-              if (ctx.mounted) Navigator.pop(ctx);
-            },
-            child: const Text('Add Product'),
-          ),
-        ],
       ),
     );
   }
@@ -296,36 +322,63 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
   void _showEditProductDialog(BuildContext context, ProductModel product) {
     final priceCtrl = TextEditingController(text: product.price.toString());
     final stockCtrl = TextEditingController(text: product.stockQuantity.toString());
+    final imageCtrl = TextEditingController(text: product.image);
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Edit ${product.name}'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(controller: priceCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Price (ETB)')),
-            const SizedBox(height: 12),
-            TextField(controller: stockCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Stock Quantity')),
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text('Edit ${product.name}'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(controller: priceCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Price (ETB)')),
+                const SizedBox(height: 12),
+                TextField(controller: stockCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Stock Quantity')),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: imageCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Product Image URL / Path',
+                    prefixIcon: Icon(Icons.image_outlined),
+                  ),
+                  onChanged: (_) => setDialogState(() {}),
+                ),
+                const SizedBox(height: 8),
+                // Live Image Preview
+                if (imageCtrl.text.isNotEmpty)
+                  Container(
+                    height: 80,
+                    width: 80,
+                    decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(8)),
+                    child: imageCtrl.text.startsWith('http')
+                        ? Image.network(imageCtrl.text, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.broken_image))
+                        : Image.asset(imageCtrl.text, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.broken_image)),
+                  ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+            ElevatedButton(
+              onPressed: () async {
+                final updated = product.copyWith(
+                  price: double.tryParse(priceCtrl.text) ?? product.price,
+                  stockQuantity: int.tryParse(stockCtrl.text) ?? product.stockQuantity,
+                  image: imageCtrl.text.trim().isNotEmpty ? imageCtrl.text.trim() : product.image,
+                );
+                await ref.read(productProvider.notifier).updateLocalProduct(updated);
+                if (ctx.mounted) Navigator.pop(ctx);
+              },
+              child: const Text('Save'),
+            ),
           ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () async {
-              final updated = product.copyWith(
-                price: double.tryParse(priceCtrl.text) ?? product.price,
-                stockQuantity: int.tryParse(stockCtrl.text) ?? product.stockQuantity,
-              );
-              await ref.read(productProvider.notifier).updateLocalProduct(updated);
-              if (ctx.mounted) Navigator.pop(ctx);
-            },
-            child: const Text('Save'),
-          ),
-        ],
       ),
     );
   }
+
 
   Future<void> _deleteProduct(String productId) async {
     await ref.read(productProvider.notifier).deleteLocalProduct(productId);
