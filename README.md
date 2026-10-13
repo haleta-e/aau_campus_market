@@ -30,12 +30,11 @@ organized and searchable.
 
 ## Main Features
 
-- **Student login** validated against a campus ID (`UGR/1234/24` format)
-  and authenticated through the Fake Store API
-- **Unified product marketplace** — Fake Store API products (Electronics,
-  Fashion, Accessories) and local campus products (Stationery, Snacks,
-  Drinks, Detergent, Sanitary) shown together, with no visible distinction
-  between the two sources
+- **Student login** validated against a campus ID (`UGR/1234/24` format),
+  authenticated through the Node.js/Express backend with JWT tokens
+- **Unified product marketplace** — campus products (Stationery, Snacks,
+  Drinks, Detergent, Sanitary) listed by real student sellers, managed
+  through the backend API and PostgreSQL database
 - **Campus-based filtering** — products and sellers shown are scoped to the
   student's selected campus, with an option to browse other campuses before
   deciding whether to order
@@ -54,10 +53,6 @@ organized and searchable.
 - **Order history** with simulated delivery/pickup status tracking
 - **User profile** combining local student data with Fake Store API user
   data
-- **Active discounts** (e.g. Exam Season Discount) shown only when
-  currently within their configured date range
-- **Hidden admin mode** (long-press the app logo) with a dashboard showing
-  marketplace stats
 - Proper loading, empty, and error states throughout, with retry on failure
 - Built with Flutter, Dart, Material 3, and Riverpod for state management
 
@@ -66,6 +61,21 @@ organized and searchable.
 - **Full Name:** [Etsegenet Amsalu]
 - **CTC Number:** [CTC-1495-26]
 - **Classroom Number:** [30003]
+
+---
+
+## Architecture
+
+AAU Campus Market is a **tri-stack** project:
+
+| Layer | Technology | Location |
+|---|---|---|
+| 📱 Mobile App | Flutter + Dart + Riverpod | `lib/` (project root) |
+| ⚙️ Backend API | Node.js + Express + TypeScript + Drizzle ORM | `backend/` |
+| 🗄️ Database | PostgreSQL (via Docker Compose) | `backend/src/db/` |
+| 🌐 Web App *(planned)* | React + TypeScript + Vite | `frontend-web/` |
+
+The Flutter mobile app and the future React web app are **independent clients** that both consume the same backend REST API at `http://localhost:4000/api/v1`.
 
 ---
 

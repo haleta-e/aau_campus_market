@@ -44,3 +44,9 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 node_modules/
+
+# React web frontend (future)
+frontend-web/node_modules/
+frontend-web/dist/
+frontend-web/.env.local
+frontend-web/.env.production

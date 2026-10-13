@@ -67,7 +67,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: const Text(
-                            'AAU Official Portal',
+                            'AAU market Portal',
                             style: TextStyle(
                               color: Color(0xFF2E7D32),
                               fontSize: 13,

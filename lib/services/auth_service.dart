@@ -162,7 +162,7 @@ class AuthService {
     } on ApiException catch (e) {
       return AuthResult.failure(e.message);
     } catch (e) {
-      return AuthResult.failure('Login failed. Check your email and password.');
+      return const AuthResult.failure('Login failed. Check your email and password.');
     }
   }
 
