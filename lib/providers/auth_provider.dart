@@ -61,8 +61,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
           campusId: session['campusId']!,
           email: session['email']!,
           phone: session['phone']!,
-          apiUsername: '',
-          apiPassword: '',
         ),
       );
     }

@@ -40,11 +40,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final subtotal = items.fold(0.0, (sum, i) => sum + i.subtotal);
     final discount = discountService.applyToCartItems(items, discounts);
 
-    // Pickup only makes sense for local campus products with a real
-    // seller physically present. API (marketplace) products have no
-    // campus presence, so any API item in the order forces delivery.
-    final hasApiItem = items.any((i) => i.source.name == 'api');
-    final canPickup = !hasApiItem && items.isNotEmpty;
+    final canPickup = items.isNotEmpty;
 
     final deliveryFee = (_fulfillmentMethod == 'delivery') ? AppConstants.deliveryFee : 0.0;
     final total = subtotal - discount + deliveryFee;
@@ -77,9 +73,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             value: 'pickup',
             groupValue: _fulfillmentMethod,
             title: const Text('Pick up myself'),
-            subtitle: Text(canPickup
-                ? 'Collect directly from the seller at $campusName • Free'
-                : 'Not available — this order includes marketplace items that must be delivered'),
+            subtitle: Text('Collect directly from the seller at $campusName • Free'),
             onChanged: canPickup ? (v) => setState(() => _fulfillmentMethod = v!) : null,
           ),
           const Divider(height: 32),

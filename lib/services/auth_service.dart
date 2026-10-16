@@ -144,8 +144,6 @@ class AuthService {
                 : 'AAU Student',
         email: user['email'] as String? ?? email,
         phone: '+251 91 000 0000',
-        apiUsername: user['username'] as String? ?? '',
-        apiPassword: password,
       );
 
       await _storageService.saveSession(

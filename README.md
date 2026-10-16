@@ -5,8 +5,7 @@
 ## Description
 
 AAU Campus Market is a mobile e-commerce application built for Addis Ababa
-University students. It combines a real product catalog from the Fake Store
-API with a local, campus-specific marketplace where students buy everyday
+University students. It provides a campus-specific marketplace where students buy everyday
 essentials — stationery, snacks, drinks, detergent, and sanitary items —
 directly from other students acting as sellers, filtered by which of the
 six AAU campuses (4 Kilo, 5 Kilo, 6 Kilo, Mexico, Sefer Selam, Ledeta) the
@@ -46,13 +45,11 @@ organized and searchable.
   seller (e.g. brand preference), persisted locally so it survives an app
   restart
 - **Buy Now** — skip the cart and check out a single product immediately
-- **Checkout** with simulated payment methods (Cash, Telebirr, CBE Birr,
+- **Checkout** with payment methods (Cash, Telebirr, CBE Birr,
   Pay on Delivery) and a choice between **Delivery** (flat 20 Birr fee) and
-  **Pickup** (free, available when every item in the order is a local
-  campus product with a real seller to collect from)
-- **Order history** with simulated delivery/pickup status tracking
-- **User profile** combining local student data with Fake Store API user
-  data
+  **Pickup** (free collection directly from the seller on campus)
+- **Order history** with delivery/pickup status tracking
+- **User profile & account settings** with student profile info, campus affiliation, and credentials management
 - Proper loading, empty, and error states throughout, with retry on failure
 - Built with Flutter, Dart, Material 3, and Riverpod for state management
 

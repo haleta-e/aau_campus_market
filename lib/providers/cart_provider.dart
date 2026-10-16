@@ -22,7 +22,7 @@ class CartNotifier extends StateNotifier<List<CartItemModel>> {
     if (index >= 0) {
       final existing = state[index];
       final newQty = existing.quantity + quantity;
-      if (!product.isFromApi && newQty > product.stockQuantity) {
+      if (newQty > product.stockQuantity) {
         throw Exception('Only ${product.stockQuantity} in stock.');
       }
       // If a new note was typed, it replaces the old one; otherwise keep it.
@@ -30,7 +30,7 @@ class CartNotifier extends StateNotifier<List<CartItemModel>> {
       state = [...state]..[index] = updated;
       await _storageService.saveCartItem(product.id, updated.toJson());
     } else {
-      if (!product.isFromApi && quantity > product.stockQuantity) {
+      if (quantity > product.stockQuantity) {
         throw Exception('Only ${product.stockQuantity} in stock.');
       }
       final item = CartItemModel.fromProduct(product, quantity: quantity, note: note);

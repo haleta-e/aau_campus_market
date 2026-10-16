@@ -14,10 +14,6 @@ class ProductModel {
   final bool isAvailable;
   final ProductSource source;
 
-  /// Only populated for API products (Fake Store API provides a rating).
-  final double? apiRating;
-  final int? apiRatingCount;
-
   const ProductModel({
     required this.id,
     required this.name,
@@ -30,17 +26,14 @@ class ProductModel {
     required this.sellerIds,
     required this.discountId,
     required this.isAvailable,
-    required this.source,
-    this.apiRating,
-    this.apiRatingCount,
+    this.source = ProductSource.local,
   });
 
-  bool get isLocal => source == ProductSource.local;
-  bool get isFromApi => source == ProductSource.api;
+  bool get isLocal => true;
+  bool get isFromApi => false;
 
-  /// For local products, admin-set stock decides this.
-  /// For API products (read-only), we treat them as always in stock.
-  bool get isInStock => isFromApi ? true : stockQuantity > 0;
+  /// For all campus products, stockQuantity decides availability.
+  bool get isInStock => stockQuantity > 0;
 
   factory ProductModel.fromLocalJson(Map<String, dynamic> json) {
     return ProductModel(
@@ -78,47 +71,6 @@ class ProductModel {
       isAvailable: (json['status'] as String?) == 'ACTIVE',
       source: ProductSource.local,
     );
-  }
-
-  /// Maps a raw Fake Store API product response into the unified model.
-  /// API products have no campus/seller — they're available marketplace-wide.
-  factory ProductModel.fromApiJson(Map<String, dynamic> json) {
-    final ratingJson = json['rating'] as Map<String, dynamic>?;
-    return ProductModel(
-      id: 'api_${json['id']}',
-      name: json['title'] as String,
-      category: _mapApiCategory(json['category'] as String),
-      description: json['description'] as String,
-      price: (json['price'] as num).toDouble(),
-      image: json['image'] as String,
-      // Fake Store API has no real stock field; API products are
-      // treated as always available (see isInStock), this is only
-      // used as a soft display cap for quantity selection.
-      stockQuantity: 50,
-      availableCampuses: const [],
-      sellerIds: const [],
-      discountId: null,
-      isAvailable: true,
-      source: ProductSource.api,
-      apiRating: ratingJson != null ? (ratingJson['rate'] as num?)?.toDouble() : null,
-      apiRatingCount: ratingJson != null ? ratingJson['count'] as int? : null,
-    );
-  }
-
-  /// Normalizes Fake Store API's category strings to match our
-  /// unified category set shown in the UI (Electronics, Fashion, Accessories).
-  static String _mapApiCategory(String apiCategory) {
-    switch (apiCategory) {
-      case 'electronics':
-        return 'Electronics';
-      case "men's clothing":
-      case "women's clothing":
-        return 'Fashion';
-      case 'jewelery':
-        return 'Accessories';
-      default:
-        return apiCategory;
-    }
   }
 
   Map<String, dynamic> toJson() {
@@ -167,6 +119,7 @@ class ProductModel {
     List<String>? sellerIds,
     String? discountId,
     bool? isAvailable,
+    ProductSource? source,
   }) {
     return ProductModel(
       id: id ?? this.id,
@@ -180,9 +133,7 @@ class ProductModel {
       sellerIds: sellerIds ?? this.sellerIds,
       discountId: discountId ?? this.discountId,
       isAvailable: isAvailable ?? this.isAvailable,
-      source: source,
-      apiRating: apiRating,
-      apiRatingCount: apiRatingCount,
+      source: source ?? this.source,
     );
   }
 }

@@ -62,8 +62,8 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
           Container(
             height: 220,
             decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(14)),
-            child: product.isFromApi
-                ? Image.network(product.image, fit: BoxFit.contain)
+            child: product.image.startsWith('http')
+                ? Image.network(product.image, fit: BoxFit.contain, errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported, size: 48))
                 : Image.asset(product.image, fit: BoxFit.contain, errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported, size: 48)),
           ),
           const SizedBox(height: 16),
@@ -79,10 +79,8 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
           const SizedBox(height: 8),
           Wrap(spacing: 8, runSpacing: 8, children: [
             Chip(label: Text(product.category)),
-            if (product.apiRating != null) Chip(avatar: const Icon(Icons.star, size: 16, color: Colors.amber), label: Text('${product.apiRating}')),
-            if (product.isLocal) Chip(label: Text(product.isInStock ? 'In stock (${product.stockQuantity})' : 'Out of stock')),
-            if (product.isLocal)
-              ...campusNames.map((name) => Chip(avatar: const Icon(Icons.location_on, size: 16), label: Text(name))),
+            Chip(label: Text(product.isInStock ? 'In stock (${product.stockQuantity})' : 'Out of stock')),
+            ...campusNames.map((name) => Chip(avatar: const Icon(Icons.location_on, size: 16), label: Text(name))),
           ]),
           const SizedBox(height: 16),
           Text(product.description),
@@ -131,12 +129,12 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
               Text('$_quantity', style: const TextStyle(fontSize: 16)),
               IconButton(
                 onPressed: () => setState(() {
-                  if (!product.isLocal || _quantity < product.stockQuantity) _quantity++;
+                  if (_quantity < product.stockQuantity) _quantity++;
                 }),
                 icon: const Icon(Icons.add_circle_outline),
               ),
               const Spacer(),
-              if (product.isLocal && campusNames.isNotEmpty)
+              if (campusNames.isNotEmpty)
                 Flexible(
                   child: Text(
                     'Available at: ${campusNames.join(", ")}',
@@ -178,7 +176,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                   onPressed: !product.isInStock
                       ? null
                       : () {
-                          if (product.isLocal && _quantity > product.stockQuantity) {
+                          if (_quantity > product.stockQuantity) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text('Only ${product.stockQuantity} in stock.')),
                             );

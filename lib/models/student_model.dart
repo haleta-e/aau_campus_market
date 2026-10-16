@@ -5,8 +5,8 @@ class StudentModel {
   final String campusId;
   final String email;
   final String phone;
-  final String apiUsername;
-  final String apiPassword;
+  final String? apiUsername;
+  final String? apiPassword;
 
   const StudentModel({
     required this.studentId,
@@ -15,8 +15,8 @@ class StudentModel {
     required this.campusId,
     required this.email,
     required this.phone,
-    required this.apiUsername,
-    required this.apiPassword,
+    this.apiUsername,
+    this.apiPassword,
   });
 
   factory StudentModel.fromJson(Map<String, dynamic> json) {
@@ -27,8 +27,8 @@ class StudentModel {
       campusId: json['campusId'] as String,
       email: json['email'] as String,
       phone: json['phone'] as String,
-      apiUsername: json['apiUsername'] as String,
-      apiPassword: json['apiPassword'] as String,
+      apiUsername: json['apiUsername'] as String?,
+      apiPassword: json['apiPassword'] as String?,
     );
   }
 
@@ -40,8 +40,8 @@ class StudentModel {
       'campusId': campusId,
       'email': email,
       'phone': phone,
-      'apiUsername': apiUsername,
-      'apiPassword': apiPassword,
+      if (apiUsername != null) 'apiUsername': apiUsername,
+      if (apiPassword != null) 'apiPassword': apiPassword,
     };
   }
 

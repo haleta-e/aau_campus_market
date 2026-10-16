@@ -70,12 +70,7 @@ class ProductService {
     }
 
     final all = merged.values.toList();
-    // Sort: local products first, then backend, alphabetically within groups
-    all.sort((a, b) {
-      if (a.isLocal && !b.isLocal) return -1;
-      if (!a.isLocal && b.isLocal) return 1;
-      return a.name.compareTo(b.name);
-    });
+    all.sort((a, b) => a.name.compareTo(b.name));
     return all;
   }
 

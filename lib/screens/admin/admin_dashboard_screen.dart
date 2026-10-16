@@ -200,8 +200,8 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(8)),
-                child: p.isFromApi
-                    ? Image.network(p.image, fit: BoxFit.cover)
+                child: p.image.startsWith('http')
+                    ? Image.network(p.image, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.image))
                     : Image.asset(p.image, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.image)),
               ),
               title: Text(p.name, style: const TextStyle(fontWeight: FontWeight.bold)),

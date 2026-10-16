@@ -28,7 +28,7 @@ class ProductCard extends StatelessWidget {
             child: Container(
               width: double.infinity,
               color: Colors.grey.shade100,
-              child: product.isFromApi
+              child: product.image.startsWith('http')
                   ? Image.network(product.image, fit: BoxFit.contain, errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported))
                   : Image.asset(product.image, fit: BoxFit.contain, errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported)),
             ),

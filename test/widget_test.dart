@@ -28,7 +28,3 @@ void main() {
     expect(find.text('1'), findsOneWidget);
   });
 }
-
-class aau_campus_market {
-  const aau_campus_market();
-}

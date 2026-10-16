@@ -29,7 +29,6 @@ class ProductsScreen extends ConsumerWidget {
     final campuses = ref.watch(campusProvider).campuses;
 
     String? locationLabelFor(ProductModel product) {
-      if (product.isFromApi) return null;
       final names = product.availableCampuses
           .map((id) => campuses.where((c) => c.id == id).map((c) => c.name).firstOrNull)
           .whereType<String>()
