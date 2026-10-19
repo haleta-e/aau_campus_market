@@ -60,9 +60,28 @@ class OrderService {
         };
       }).toList();
 
-      await _apiService.placeOrder(sellerId: sellerId, items: orderLineItems);
+      final backendResult = await _apiService.placeOrder(sellerId: sellerId, items: orderLineItems);
+      if (backendResult.containsKey('order_number')) {
+        final serverOrderNumber = backendResult['order_number'] as String;
+        final syncedOrder = OrderModel(
+          orderId: serverOrderNumber,
+          items: items,
+          subtotal: subtotal,
+          discount: discount,
+          deliveryFee: deliveryFee,
+          total: total,
+          paymentMethod: paymentMethod,
+          fulfillmentMethod: fulfillmentMethod,
+          campusId: campusId,
+          sellerIds: sellerIds,
+          orderDate: DateTime.now(),
+          status: OrderStatus.placed,
+        );
+        await _storageService.saveOrder(syncedOrder.orderId, syncedOrder.toJson());
+        return syncedOrder;
+      }
     } catch (_) {
-      // Graceful offline fallback
+      // Graceful offline fallback: preserves local order record when backend is offline
     }
 
     return order;
