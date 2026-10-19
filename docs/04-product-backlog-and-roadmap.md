@@ -109,7 +109,7 @@ As a developer, I want the project to run consistently so that development and t
 ### PB-003: Establish project quality checks
 
 **Priority:** P1
-**Status:** Needs Verification
+**Status:** Implemented
 
 **User story**
 
@@ -289,7 +289,7 @@ As a buyer, I want to add, remove, and update products in my cart so that I can 
 ### PB-012: Validate checkout
 
 **Priority:** P0
-**Status:** Needs Verification
+**Status:** Implemented
 
 **User story**
 
