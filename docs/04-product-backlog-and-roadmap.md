@@ -879,7 +879,7 @@ As an administrator, I want important operational changes recorded so that issue
 ### PB-042: Inspect and plan the web application
 
 **Priority:** P0
-**Status:** Needs Verification
+**Status:** Implemented
 
 **User story**
 
@@ -887,16 +887,16 @@ As a developer, I want to understand the existing backend API and the web applic
 
 **Acceptance criteria**
 
-* [ ] Existing API routes and authentication behavior are documented.
-* [ ] Existing Flutter functionality is mapped to corresponding web workflows.
-* [ ] The need for additional backend endpoints is identified.
-* [ ] The existing backend remains the source of truth for business rules and data.
-* [ ] The web implementation plan identifies reused functionality and genuine gaps.
+* [x] Existing API routes and authentication behavior are documented.
+* [x] Existing Flutter functionality is mapped to corresponding web workflows.
+* [x] The need for additional backend endpoints is identified.
+* [x] The existing backend remains the source of truth for business rules and data.
+* [x] The web implementation plan identifies reused functionality and genuine gaps.
 
 ### PB-043: Establish the React web foundation
 
 **Priority:** P1
-**Status:** Needs Verification
+**Status:** Implemented
 
 **User story**
 
@@ -904,11 +904,11 @@ As a developer, I want a maintainable React web application so that browser-base
 
 **Acceptance criteria**
 
-* [ ] The web application uses the agreed React, TypeScript, and Vite stack.
-* [ ] The project structure is documented.
-* [ ] Environment-specific API configuration is handled appropriately.
-* [ ] The web application can run using documented instructions.
-* [ ] Existing mobile and backend workflows remain functional.
+* [x] The web application uses the agreed React, TypeScript, and Vite stack.
+* [x] The project structure is documented.
+* [x] Environment-specific API configuration is handled appropriately.
+* [x] The web application can run using documented instructions.
+* [x] Existing mobile and backend workflows remain functional.
 
 ### PB-044: Integrate web authentication
 
@@ -930,7 +930,7 @@ As a buyer, I want to sign in through the web interface so that I can use the ma
 ### PB-045: Implement core shopping on the web
 
 **Priority:** P1
-**Status:** Needs Verification
+**Status:** Partially Implemented
 
 **User story**
 
@@ -938,13 +938,13 @@ As a buyer, I want to browse products and place orders through the web interface
 
 **Acceptance criteria**
 
-* [ ] Buyers can browse products.
+* [x] Buyers can browse products.
 * [ ] Buyers can view product details.
 * [ ] Buyers can manage a cart.
 * [ ] Buyers can complete the supported checkout workflow.
 * [ ] Buyers can view their own orders.
-* [ ] Server-side validation and authorization apply equally to web requests.
-* [ ] The web application handles loading, errors, and empty states.
+* [x] Server-side validation and authorization apply equally to web requests.
+* [x] The web application handles loading, errors, and empty states.
 
 **Dependency:** Existing API assessment and web authentication.
 
@@ -1265,10 +1265,10 @@ This table provides a consolidated view of the AAU Campus Market Product Backlog
 | PB-039 | Administration           | Administrative Dashboard                | As an administrator, I want an overview of marketplace operations.                               | P1       | Needs Verification  |
 | PB-040 | Administration           | Manage Users and Roles                  | As an administrator, I want to manage authorized accounts and operational roles.                 | P1       | Needs Verification  |
 | PB-041 | Administration           | Audit Important Operations              | As an administrator, I want important changes to be traceable.                                   | P1       | Needs Verification  |
-| PB-042 | Web Application          | Assess Web Integration                  | As a developer, I want to understand the API before integrating the web application.             | P0       | Needs Verification  |
-| PB-043 | Web Application          | Establish React Foundation              | As a developer, I want a maintainable React and TypeScript application.                          | P1       | Needs Verification  |
+| PB-042 | Web Application          | Assess Web Integration                  | As a developer, I want to understand the API before integrating the web application.             | P0       | Implemented         |
+| PB-043 | Web Application          | Establish React Foundation              | As a developer, I want a maintainable React and TypeScript application.                          | P1       | Implemented         |
 | PB-044 | Web Application          | Web Authentication                      | As a buyer, I want to sign in through the web interface.                                         | P1       | Needs Verification  |
-| PB-045 | Web Application          | Web Shopping Workflow                   | As a buyer, I want to browse, manage a cart, and order through a browser.                        | P1       | Needs Verification  |
+| PB-045 | Web Application          | Web Shopping Workflow                   | As a buyer, I want to browse, manage a cart, and order through a browser.                        | P1       | Partially Implemented |
 | PB-046 | Web Application          | Role-Specific Web Interfaces            | As an authorized participant, I want browser access to my permitted tools.                       | P2       | Needs Verification  |
 | PB-047 | Security and Reliability | API Input Validation                    | As an operator, I want invalid requests rejected safely.                                         | P0       | Needs Verification  |
 | PB-048 | Security and Reliability | Protect Private Data                    | As a user, I want my personal and order data protected.                                          | P0       | Needs Verification  |

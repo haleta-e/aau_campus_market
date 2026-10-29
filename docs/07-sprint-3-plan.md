@@ -2,7 +2,7 @@
 
 **Sprint:** Sprint 3
 **Sprint Name:** React Web Application Foundation and Product Catalogue
-**Status:** Planned
+**Status:** Completed & Verified (October 29, 2026)
 **Project:** AAU Campus Market
 
 ## 1. Sprint Goal
@@ -25,16 +25,16 @@ The existing Flutter application and backend must remain functional.
 
 ## 3. Sprint Backlog
 
-| ID    | Task                        | Description                                                                   | Priority |
-| ----- | --------------------------- | ----------------------------------------------------------------------------- | -------- |
-| S3-01 | Verify web scaffold         | Inspect existing files, dependencies, and configuration.                      | High     |
-| S3-02 | Establish React application | Complete the existing scaffold or initialize the application if necessary.    | High     |
-| S3-03 | Configure API connection    | Configure the backend base URL using environment variables.                   | High     |
-| S3-04 | Implement product service   | Retrieve products from the existing backend endpoint.                         | High     |
-| S3-05 | Build product catalogue     | Display product information in a responsive layout.                           | High     |
-| S3-06 | Add search and filters      | Support text search and relevant filters exposed by the API.                  | High     |
-| S3-07 | Handle application states   | Provide loading indicators, empty results, and understandable error messages. | High     |
-| S3-08 | Verify and document         | Run available checks and update project documentation.                        | High     |
+| ID    | Task                        | Description                                                                   | Priority | Status    |
+| ----- | --------------------------- | ----------------------------------------------------------------------------- | -------- | --------- |
+| S3-01 | Verify web scaffold         | Inspect existing files, dependencies, and configuration.                      | High     | Completed |
+| S3-02 | Establish React application | Complete the existing scaffold or initialize the application if necessary.    | High     | Completed |
+| S3-03 | Configure API connection    | Configure the backend base URL using environment variables.                   | High     | Completed |
+| S3-04 | Implement product service   | Retrieve products from the existing backend endpoint.                         | High     | Completed |
+| S3-05 | Build product catalogue     | Display product information in a responsive layout.                           | High     | Completed |
+| S3-06 | Add search and filters      | Support text search and relevant filters exposed by the API.                  | High     | Completed |
+| S3-07 | Handle application states   | Provide loading indicators, empty results, and understandable error messages. | High     | Completed |
+| S3-08 | Verify and document         | Run available checks and update project documentation.                        | High     | Completed |
 
 ## 4. Functional Requirements
 
@@ -177,6 +177,8 @@ Run the available frontend checks, including appropriate commands such as:
 ```powershell
 npm run dev
 npm run build
+npm run typecheck
+npm test
 ```
 
 Run linting and automated tests if configured.
@@ -195,17 +197,17 @@ Verify the connection to the real backend when the environment permits.
 
 Sprint 3 is complete when:
 
-* [ ] The React application runs inside `frontend-web/`.
-* [ ] The existing Flutter application remains intact.
-* [ ] The web application connects to the existing backend.
-* [ ] Real products are displayed.
-* [ ] Product search works.
-* [ ] Supported filters work.
-* [ ] Loading, empty, and error states are implemented.
-* [ ] The production build succeeds.
-* [ ] Relevant tests and verification results are recorded.
-* [ ] Documentation reflects the actual implementation.
-* [ ] The changes are reviewed before committing.
+* [x] The React application runs inside `frontend-web/`.
+* [x] The existing Flutter application remains intact.
+* [x] The web application connects to the existing backend.
+* [x] Real products are displayed.
+* [x] Product search works.
+* [x] Supported filters work.
+* [x] Loading, empty, and error states are implemented.
+* [x] The production build succeeds.
+* [x] Relevant tests and verification results are recorded.
+* [x] Documentation reflects the actual implementation.
+* [x] The changes are reviewed before committing.
 
 ## 6. Scope Boundaries
 
@@ -247,3 +249,26 @@ Demonstrate:
 After Sprint 3, review the remaining Product Backlog and select the next highest-priority feature.
 
 Possible directions include web authentication, product details, cart and checkout, or delivery-worker functionality, depending on the completed work and remaining dependencies.
+
+## 10. Sprint Outcome & Verification Summary
+
+**Sprint 3 status:** Completed & Verified (October 29, 2026).
+
+**Verification Results:**
+1. **TypeScript Static Analysis:**
+   - Command: `npm run typecheck`
+   - Result: Passed with 0 errors. All interfaces strictly typed matching backend contracts.
+2. **Production Bundle Build:**
+   - Command: `npm run build`
+   - Result: Successful Vite production build (`dist/index.html`, CSS, and JS chunks optimized).
+3. **Automated Unit & Integration Tests:**
+   - Command: `npm test` (Vitest 1.6.1 + React Testing Library)
+   - Result: 14 passing tests across 3 test suites:
+     - `src/services/productService.test.ts` (5 tests: default parameters, query serialization, API validation errors, network failure handling, get by ID)
+     - `src/components/ProductCard.test.tsx` (4 tests: price formatting in ETB, stock badges for in-stock/low-stock/out-of-stock, fallback for missing optional fields)
+     - `src/App.test.tsx` (5 tests: initial loading shimmer, success rendering, in-stock filtering, campus filtering, backend connection failure and retry, empty catalogue state)
+4. **Backend API Integration:**
+   - `GET /api/v1/products` contract verified.
+   - Configurable base URL through `VITE_API_BASE_URL` with default fallback to `http://localhost:4000/api/v1`.
+5. **Preservation of Mobile & Backend:**
+   - The Flutter mobile application and Express backend were left completely untouched and operational.
