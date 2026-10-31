@@ -1,6 +1,6 @@
 # AAU Campus Market — Web Frontend
 
-> **Status:** Active — Sprint 3 Implemented (React + TypeScript + Vite Web Application & Product Catalogue).
+> **Status:** Active — Sprint 4 Implemented (Product Catalogue, Product Details & Persistent Shopping Cart).
 
 This directory contains the **React + TypeScript + Vite** web frontend for AAU Campus Market — a web-based marketplace interface designed for Addis Ababa University students, faculty, and administrators.
 

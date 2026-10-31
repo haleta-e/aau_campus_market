@@ -939,8 +939,8 @@ As a buyer, I want to browse products and place orders through the web interface
 **Acceptance criteria**
 
 * [x] Buyers can browse products.
-* [ ] Buyers can view product details.
-* [ ] Buyers can manage a cart.
+* [x] Buyers can view product details.
+* [x] Buyers can manage a cart.
 * [ ] Buyers can complete the supported checkout workflow.
 * [ ] Buyers can view their own orders.
 * [x] Server-side validation and authorization apply equally to web requests.

@@ -2,7 +2,7 @@
 
 **Sprint:** Sprint 4  
 **Sprint Name:** Product Details and Shopping Cart  
-**Status:** Planned — Sprint 3 In Progress  
+**Status:** Completed & Verified  
 **Project:** AAU Campus Market
 
 ## 1. Sprint Goal
@@ -23,16 +23,16 @@ Sprint 4 must build on the actual implementation delivered in Sprint 3. If a req
 
 ## 3. Sprint Backlog
 
-| ID | Task | Description | Priority |
-|---|---|---|---|
-| S4-01 | Review Sprint 3 deliverables | Verify the catalogue, API integration, and existing web architecture. | High |
-| S4-02 | Product details view | Display available product information when a user selects a product. | High |
-| S4-03 | Quantity selection | Allow valid quantity selection based on available stock. | High |
-| S4-04 | Add to cart | Add selected products to the shopping cart. | High |
-| S4-05 | Cart management | Update quantities and remove products. | High |
-| S4-06 | Cart persistence | Preserve cart contents across page refreshes using an appropriate storage strategy. | High |
-| S4-07 | Cart totals | Calculate subtotal and display relevant price information. | High |
-| S4-08 | Testing and documentation | Verify functionality and update project records. | High |
+| ID | Task | Description | Priority | Status |
+|---|---|---|---|---|
+| S4-01 | Review Sprint 3 deliverables | Verify the catalogue, API integration, and existing web architecture. | High | Completed |
+| S4-02 | Product details view | Display available product information when a user selects a product. | High | Completed |
+| S4-03 | Quantity selection | Allow valid quantity selection based on available stock. | High | Completed |
+| S4-04 | Add to cart | Add selected products to the shopping cart. | High | Completed |
+| S4-05 | Cart management | Update quantities and remove products. | High | Completed |
+| S4-06 | Cart persistence | Preserve cart contents across page refreshes using an appropriate storage strategy. | High | Completed |
+| S4-07 | Cart totals | Calculate subtotal and display relevant price information. | High | Completed |
+| S4-08 | Testing and documentation | Verify functionality and update project records. | High | Completed |
 
 ## 4. Functional Requirements
 
@@ -162,19 +162,19 @@ If these dependencies are not satisfied at the start of Sprint 4, revise the sco
 
 Sprint 4 is complete when:
 
-- [ ] Product details can be opened from the catalogue.
-- [ ] Valid quantities can be selected.
-- [ ] Available products can be added to the cart.
-- [ ] Cart quantities can be updated.
-- [ ] Products can be removed.
-- [ ] Cart contents persist across refreshes.
-- [ ] Subtotals are accurate.
-- [ ] Stock limits are respected.
-- [ ] Appropriate tests pass.
-- [ ] The production build succeeds.
-- [ ] Existing mobile and backend functionality remains intact.
-- [ ] Documentation reflects the actual implementation.
-- [ ] Changes are reviewed and committed separately by logical unit.
+- [x] Product details can be opened from the catalogue.
+- [x] Valid quantities can be selected.
+- [x] Available products can be added to the cart.
+- [x] Cart quantities can be updated.
+- [x] Products can be removed.
+- [x] Cart contents persist across refreshes.
+- [x] Subtotals are accurate.
+- [x] Stock limits are respected.
+- [x] Appropriate tests pass.
+- [x] The production build succeeds.
+- [x] Existing mobile and backend functionality remains intact.
+- [x] Documentation reflects the actual implementation.
+- [x] Changes are reviewed and committed separately by logical unit.
 
 ## 7. Scope Boundaries
 
@@ -214,3 +214,28 @@ Potential candidates include:
 - Integration with existing order management.
 
 The next sprint must follow the project's documented dependencies and business rules.
+
+## 10. Sprint 4 Outcome and Verification Summary
+
+Sprint 4 was successfully implemented, verified, and accepted according to the Definition of Done.
+
+### 1. Test Verification
+- **Frontend Vitest Suites:** 6 of 6 test files passed, 36 of 36 unit/integration tests passed.
+  - `src/services/productService.test.ts` (5 tests)
+  - `src/context/CartContext.test.tsx` (11 tests)
+  - `src/components/ProductCard.test.tsx` (4 tests)
+  - `src/components/ProductDetails.test.tsx` (6 tests)
+  - `src/components/CartPage.test.tsx` (5 tests)
+  - `src/App.test.tsx` (5 tests)
+- **Backend Unit Tests:** 2 of 2 test files passed, 9 of 9 unit tests passed (`jwt.test.ts`, `password.test.ts`).
+
+### 2. TypeScript and Production Build
+- `npm run typecheck`: 0 errors under TypeScript strict mode (`tsc --noEmit`).
+- `npm run build`: Production build succeeded (`tsc && vite build`), generating optimized bundles in `dist/` in 1.23s.
+
+### 3. Deliverables Summary
+- `src/types/cart.ts`: Cart item and context types.
+- `src/context/CartContext.tsx`: State provider with synchronous stock validation, local storage persistence, and memoized totals.
+- `src/components/ProductDetails.tsx`: Product inspection with quantity validation, campus/seller meta, and add-to-cart.
+- `src/components/CartPage.tsx`: Full cart page with quantity stepper, stock capping, item removal, clear cart, and order summary.
+- `src/App.tsx` & `src/components/Header.tsx`: Integrated view navigation (`catalogue` | `details` | `cart`) and cart counter badge.
