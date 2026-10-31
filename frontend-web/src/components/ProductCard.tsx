@@ -2,9 +2,10 @@ import { Product } from '../types/product';
 
 interface ProductCardProps {
   product: Product;
+  onSelectProduct?: (product: Product) => void;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, onSelectProduct }: ProductCardProps) {
   const isOutOfStock = product.stock_quantity <= 0;
   const isLowStock = product.stock_quantity > 0 && product.stock_quantity <= 5;
 
@@ -13,8 +14,27 @@ export function ProductCard({ product }: ProductCardProps) {
     ? product.price
     : `${numericPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ETB`;
 
+  const handleCardClick = () => {
+    if (onSelectProduct) {
+      onSelectProduct(product);
+    }
+  };
+
   return (
-    <article className="product-card" data-testid={`product-card-${product.id}`}>
+    <article
+      className="product-card clickable"
+      data-testid={`product-card-${product.id}`}
+      onClick={handleCardClick}
+      role={onSelectProduct ? 'button' : 'article'}
+      tabIndex={onSelectProduct ? 0 : undefined}
+      onKeyDown={(e) => {
+        if (onSelectProduct && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          onSelectProduct(product);
+        }
+      }}
+      aria-label={`View details for ${product.name}`}
+    >
       <div className="product-card-media">
         <div className="product-placeholder-icon" aria-hidden="true">
           {product.category.toLowerCase().includes('elec') ? '🔌' :
@@ -69,6 +89,19 @@ export function ProductCard({ product }: ProductCardProps) {
               </span>
             )}
           </div>
+        </div>
+
+        <div className="card-action-row">
+          <button
+            type="button"
+            className="view-details-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onSelectProduct) onSelectProduct(product);
+            }}
+          >
+            View Details →
+          </button>
         </div>
       </div>
     </article>

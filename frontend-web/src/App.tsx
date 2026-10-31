@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Product, PaginationMeta } from './types/product';
 import { productService } from './services/productService';
 import { ApiError } from './config/api';
+import { CartProvider } from './context/CartContext';
 import { Header } from './components/Header';
 import { FilterBar, FilterState } from './components/FilterBar';
 import { ProductGrid } from './components/ProductGrid';
@@ -9,6 +10,8 @@ import { LoadingSkeleton } from './components/LoadingSkeleton';
 import { ErrorMessage } from './components/ErrorMessage';
 import { EmptyState } from './components/EmptyState';
 import { Pagination } from './components/Pagination';
+import { ProductDetails } from './components/ProductDetails';
+import { CartPage } from './components/CartPage';
 import './App.css';
 
 const INITIAL_FILTERS: FilterState = {
@@ -28,7 +31,11 @@ const AAU_CAMPUSES = [
   'Ledeta Campus',
 ];
 
-export default function App() {
+export function AppContent() {
+  const [currentView, setCurrentView] = useState<'catalogue' | 'details' | 'cart'>('catalogue');
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | undefined>(undefined);
+
   const [products, setProducts] = useState<Product[]>([]);
   const [pagination, setPagination] = useState<PaginationMeta | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -135,6 +142,18 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleSelectProduct = (product: Product) => {
+    setSelectedProductId(product.id);
+    setSelectedProduct(product);
+    setCurrentView('details');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleNavigate = (view: 'catalogue' | 'cart') => {
+    setCurrentView(view);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const isFiltered =
     filters.search !== '' ||
     filters.category !== '' ||
@@ -143,40 +162,56 @@ export default function App() {
 
   return (
     <div className="app-container">
-      <Header />
+      <Header currentView={currentView} onNavigate={handleNavigate} />
 
       <main className="main-content">
-        <FilterBar
-          filters={filters}
-          categories={categories}
-          campuses={AAU_CAMPUSES}
-          totalResults={filteredProducts.length}
-          onFilterChange={handleFilterChange}
-          onResetFilters={handleResetFilters}
-        />
-
-        {loading ? (
-          <LoadingSkeleton />
-        ) : error ? (
-          <ErrorMessage
-            message={error.message}
-            statusCode={error.statusCode}
-            code={error.code}
-            onRetry={loadProducts}
+        {currentView === 'cart' ? (
+          <CartPage onContinueShopping={() => handleNavigate('catalogue')} />
+        ) : currentView === 'details' && selectedProductId ? (
+          <ProductDetails
+            productId={selectedProductId}
+            initialProduct={selectedProduct}
+            onBack={() => handleNavigate('catalogue')}
+            onViewCart={() => handleNavigate('cart')}
           />
-        ) : products.length === 0 ? (
-          <EmptyState isFiltered={isFiltered} onClearFilters={handleResetFilters} />
-        ) : filteredProducts.length === 0 ? (
-          <EmptyState isFiltered={true} onClearFilters={handleResetFilters} />
         ) : (
           <>
-            <ProductGrid products={filteredProducts} />
-            {pagination && (
-              <Pagination
-                currentPage={pagination.page}
-                totalPages={pagination.totalPages}
-                onPageChange={handlePageChange}
+            <FilterBar
+              filters={filters}
+              categories={categories}
+              campuses={AAU_CAMPUSES}
+              totalResults={filteredProducts.length}
+              onFilterChange={handleFilterChange}
+              onResetFilters={handleResetFilters}
+            />
+
+            {loading ? (
+              <LoadingSkeleton />
+            ) : error ? (
+              <ErrorMessage
+                message={error.message}
+                statusCode={error.statusCode}
+                code={error.code}
+                onRetry={loadProducts}
               />
+            ) : products.length === 0 ? (
+              <EmptyState isFiltered={isFiltered} onClearFilters={handleResetFilters} />
+            ) : filteredProducts.length === 0 ? (
+              <EmptyState isFiltered={true} onClearFilters={handleResetFilters} />
+            ) : (
+              <>
+                <ProductGrid
+                  products={filteredProducts}
+                  onSelectProduct={handleSelectProduct}
+                />
+                {pagination && (
+                  <Pagination
+                    currentPage={pagination.page}
+                    totalPages={pagination.totalPages}
+                    onPageChange={handlePageChange}
+                  />
+                )}
+              </>
             )}
           </>
         )}
@@ -186,5 +221,13 @@ export default function App() {
         <p>© 2026 Addis Ababa University Campus Market — University Student Commerce Platform</p>
       </footer>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <CartProvider>
+      <AppContent />
+    </CartProvider>
   );
 }
