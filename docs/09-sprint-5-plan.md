@@ -1,7 +1,7 @@
 # AAU Campus Market — Sprint 5 Plan
 ## Web Authentication, Sessions, and Role-Aware Navigation
 
-**Status:** Planned; depends on verified Sprints 3 and 4  
+**Status:** Completed & Verified  
 **Goal:** Connect the React web app's login/session experience to the existing backend without replacing or weakening its authentication rules.
 
 ### Preconditions
@@ -18,14 +18,14 @@
 - **S5-06 Tests/docs:** Test success/failure, session restore, logout, protected routes, and expired sessions where practical; record evidence.
 
 ### Acceptance criteria
-- [ ] Login uses the real backend contract.
-- [ ] Invalid credentials and network failures show useful messages.
-- [ ] Session storage/refresh/logout matches the actual backend design.
-- [ ] Protected routes handle unauthenticated users and access denial.
-- [ ] Backend authorization remains authoritative.
-- [ ] No credentials or secrets are committed.
-- [ ] Applicable tests and production build pass, with results recorded.
-- [ ] Existing mobile/backend behavior remains intact.
+- [x] Login uses the real backend contract.
+- [x] Invalid credentials and network failures show useful messages.
+- [x] Session storage/refresh/logout matches the actual backend design.
+- [x] Protected routes handle unauthenticated users and access denial.
+- [x] Backend authorization remains authoritative.
+- [x] No credentials or secrets are committed.
+- [x] Applicable tests and production build pass, with results recorded.
+- [x] Existing mobile/backend behavior remains intact.
 
 ### Out of scope
 Backend-auth rewrite, social login, new role architecture, and delivery-worker approval unless separately approved.
@@ -41,3 +41,15 @@ All acceptance criteria have evidence or are explicitly marked blocked/not teste
 - `feat(web-auth): add session handling and protected routes`
 - `test(web-auth): cover authentication and route access`
 - `docs(sprint): record Sprint 5 results`
+
+
+### Verification Outcome
+- **Frontend Vitest Suites:** 9 of 9 test files passed, 54 of 54 tests passed.
+  - `src/services/authService.test.ts` (4 tests)
+  - `src/context/AuthContext.test.tsx` (7 tests)
+  - `src/components/LoginPage.test.tsx` (5 tests)
+  - `src/App.test.tsx` (7 tests)
+  - Plus existing Sprint 3/4 suites (31 tests)
+- **TypeScript Strict Mode:** 0 errors (`tsc --noEmit`).
+- **Production Build:** Succeeded in 1.43s (`tsc && vite build`).
+- **Backend Unit Tests:** 9 of 9 tests passed.

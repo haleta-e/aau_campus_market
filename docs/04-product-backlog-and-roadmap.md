@@ -930,7 +930,7 @@ As a buyer, I want to sign in through the web interface so that I can use the ma
 ### PB-045: Implement core shopping on the web
 
 **Priority:** P1
-**Status:** Partially Implemented
+**Status:** Implemented
 
 **User story**
 
@@ -941,8 +941,8 @@ As a buyer, I want to browse products and place orders through the web interface
 * [x] Buyers can browse products.
 * [x] Buyers can view product details.
 * [x] Buyers can manage a cart.
-* [ ] Buyers can complete the supported checkout workflow.
-* [ ] Buyers can view their own orders.
+* [x] Buyers can complete the supported checkout workflow.
+* [x] Buyers can view their own orders.
 * [x] Server-side validation and authorization apply equally to web requests.
 * [x] The web application handles loading, errors, and empty states.
 
@@ -1267,8 +1267,8 @@ This table provides a consolidated view of the AAU Campus Market Product Backlog
 | PB-041 | Administration           | Audit Important Operations              | As an administrator, I want important changes to be traceable.                                   | P1       | Needs Verification  |
 | PB-042 | Web Application          | Assess Web Integration                  | As a developer, I want to understand the API before integrating the web application.             | P0       | Implemented         |
 | PB-043 | Web Application          | Establish React Foundation              | As a developer, I want a maintainable React and TypeScript application.                          | P1       | Implemented         |
-| PB-044 | Web Application          | Web Authentication                      | As a buyer, I want to sign in through the web interface.                                         | P1       | Needs Verification  |
-| PB-045 | Web Application          | Web Shopping Workflow                   | As a buyer, I want to browse, manage a cart, and order through a browser.                        | P1       | Partially Implemented |
+| PB-044 | Web Application          | Web Authentication                      | As a buyer, I want to sign in through the web interface.                                         | P1       | Implemented         |
+| PB-045 | Web Application          | Web Shopping Workflow                   | As a buyer, I want to browse, manage a cart, and order through a browser.                        | P1       | Implemented         |
 | PB-046 | Web Application          | Role-Specific Web Interfaces            | As an authorized participant, I want browser access to my permitted tools.                       | P2       | Needs Verification  |
 | PB-047 | Security and Reliability | API Input Validation                    | As an operator, I want invalid requests rejected safely.                                         | P0       | Needs Verification  |
 | PB-048 | Security and Reliability | Protect Private Data                    | As a user, I want my personal and order data protected.                                          | P0       | Needs Verification  |
