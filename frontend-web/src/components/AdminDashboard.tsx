@@ -1,17 +1,34 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getAdminStats, getAdminUsers, updateUserStatus, getAdminOrders, getAdminComplaints, resolveComplaint, adminUpdateProduct, adminDeleteProduct } from '../services/adminService';
-import type { AdminStats, AdminUser, AdminOrder, AdminComplaint, ResolveComplaintPayload } from '../types/admin';
+import {
+  getAdminStats,
+  getAdminUsers,
+  getAdminOrders,
+  getAdminComplaints,
+  getAuditLogs,
+  updateUserStatus,
+  resolveComplaint,
+  adminUpdateProduct,
+  adminDeleteProduct,
+} from '../services/adminService';
+import type {
+  AdminStats,
+  AdminUser,
+  AdminOrder,
+  AdminComplaint,
+  AuditLogEntry,
+  ResolveComplaintPayload,
+} from '../types/admin';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-export type AdminTab = 'overview' | 'users' | 'orders' | 'complaints' | 'products' | 'audit';
+type AdminTab = 'overview' | 'users' | 'orders' | 'complaints' | 'products' | 'audit';
 
-export function formatETB(value: string | number): string {
+function formatETB(value: string | number): string {
   const n = typeof value === 'string' ? parseFloat(value) : value;
   return `ETB ${n.toLocaleString('en-ET', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-export function statusBadge(status: string) {
+function statusBadge(status: string) {
   const map: Record<string, string> = {
     ACTIVE: 'admin-badge badge-active',
     SUSPENDED: 'admin-badge badge-suspended',
@@ -38,7 +55,7 @@ export function statusBadge(status: string) {
 
 // ─── Overview panel ──────────────────────────────────────────────────────────
 
-export function OverviewPanel() {
+function OverviewPanel() {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -88,7 +105,7 @@ export function OverviewPanel() {
 
 // ─── Users panel ─────────────────────────────────────────────────────────────
 
-export function UsersPanel() {
+function UsersPanel() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -247,10 +264,9 @@ export function UsersPanel() {
   );
 }
 
-
 // ─── Orders panel ─────────────────────────────────────────────────────────────
 
-export function OrdersPanel() {
+function OrdersPanel() {
   const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -330,10 +346,9 @@ export function OrdersPanel() {
   );
 }
 
-
 // ─── Complaints panel ─────────────────────────────────────────────────────────
 
-export function ComplaintsPanel() {
+function ComplaintsPanel() {
   const [complaints, setComplaints] = useState<AdminComplaint[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -504,7 +519,6 @@ export function ComplaintsPanel() {
   );
 }
 
-
 // ─── Products / Inventory panel ───────────────────────────────────────────────
 
 interface ProductRow {
@@ -518,7 +532,7 @@ interface ProductRow {
   seller?: { store_name?: string };
 }
 
-export function ProductsPanel() {
+function ProductsPanel() {
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -536,7 +550,8 @@ export function ProductsPanel() {
   const load = useCallback(() => {
     setLoading(true);
     setError(null);
-    fetch(`${import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api/v1'}/products?limit=200`)
+    // Use public products endpoint — paginate with large limit to get all
+    fetch(`${import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000/api/v1'}/products?limit=200`)
       .then((r) => r.json())
       .then((body) => setProducts(body.data ?? []))
       .catch((e) => setError(e.message ?? 'Failed to load products'))
@@ -766,7 +781,94 @@ export function ProductsPanel() {
   );
 }
 
-// ─── Main Admin Dashboard Shell ───────────────────────────────────────────────
+// ─── Audit Logs panel ─────────────────────────────────────────────────────────
+
+function AuditLogsPanel() {
+  const [logs, setLogs] = useState<AuditLogEntry[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const LIMIT = 25;
+
+  const load = useCallback((p: number) => {
+    setLoading(true);
+    setError(null);
+    getAuditLogs({ page: p, limit: LIMIT })
+      .then((res) => {
+        setLogs(res.rows);
+        setTotal(res.total);
+      })
+      .catch((e) => setError(e.message ?? 'Failed to load audit logs'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => { load(page); }, [load, page]);
+
+  const totalPages = Math.ceil(total / LIMIT);
+
+  return (
+    <section aria-labelledby="admin-audit-heading">
+      <h2 id="admin-audit-heading" className="admin-section-title">Audit Trail</h2>
+      {loading ? (
+        <p className="admin-loading">Loading audit logs…</p>
+      ) : error ? (
+        <p className="admin-error">⚠ {error}</p>
+      ) : (
+        <>
+          <div className="admin-table-wrapper">
+            <table className="admin-table" aria-label="Audit logs">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Actor</th>
+                  <th>Action</th>
+                  <th>Entity</th>
+                  <th>IP</th>
+                </tr>
+              </thead>
+              <tbody>
+                {logs.length === 0 ? (
+                  <tr><td colSpan={5} className="admin-empty-row">No audit logs yet.</td></tr>
+                ) : (
+                  logs.map((l) => (
+                    <tr key={l.id}>
+                      <td className="admin-mono">{new Date(l.created_at).toLocaleString()}</td>
+                      <td>{l.actor_username ?? l.actor_email ?? '—'}</td>
+                      <td><span className="admin-action-tag">{l.action}</span></td>
+                      <td>{l.entity_type}{l.entity_id ? ` / ${l.entity_id.slice(0, 8)}…` : ''}</td>
+                      <td>{l.ip_address ?? '—'}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+          <div className="admin-pagination">
+            <button
+              className="admin-btn admin-btn-secondary"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              ← Prev
+            </button>
+            <span>Page {page} of {totalPages || 1}</span>
+            <button
+              className="admin-btn admin-btn-secondary"
+              disabled={page >= totalPages}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              Next →
+            </button>
+          </div>
+          <p className="admin-count">{total} total audit event(s)</p>
+        </>
+      )}
+    </section>
+  );
+}
+
+// ─── Main Admin Dashboard ─────────────────────────────────────────────────────
 
 export function AdminDashboard() {
   const [tab, setTab] = useState<AdminTab>('overview');
@@ -804,11 +906,22 @@ export function AdminDashboard() {
       </nav>
 
       <div className="admin-tab-content">
-        {tab === 'overview' && <OverviewPanel />}
-        {tab === 'users'    && <UsersPanel />}
-        {tab === 'orders'   && <OrdersPanel />}
+        {tab === 'overview'   && <OverviewPanel />}
+        {tab === 'users'      && <UsersPanel />}
+        {tab === 'orders'     && <OrdersPanel />}
         {tab === 'complaints' && <ComplaintsPanel />}
         {tab === 'products'   && <ProductsPanel />}
+        {tab === 'audit'      && <AuditLogsPanel />}
+      </div>
+
+      <div className="admin-blocked-notice">
+        <h3>Features Not Yet Implemented (Require Backend Extension)</h3>
+        <ul>
+          <li><strong>Discount Management</strong> — No discount table or endpoints exist in the current DB schema. Requires migration and new routes.</li>
+          <li><strong>Special Requests</strong> — No special_requests table or endpoints exist. Business rules (Mon/Wed/Sat 6AM–3PM, deposit amounts) are undocumented and not in the codebase.</li>
+          <li><strong>Delivery Worker Management</strong> — The <code>DELIVERY_WORKER</code> role does not exist in the users.role enum. Requires schema migration.</li>
+        </ul>
+        <p>These are documented blockers, not implementation errors. Unblock them by approving the required schema migrations and backend routes.</p>
       </div>
     </div>
   );
