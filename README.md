@@ -1,11 +1,11 @@
- AAU Campus Market
+# AAU Campus Market
 
 *Your Campus Marketplace*
 
 ## Description
 
-AAU Campus Market is a mobile e-commerce application built for Addis Ababa
-University students. It provides a campus-specific marketplace where students buy everyday
+AAU Campus Market is a multi-client university e-commerce platform built specifically for Addis Ababa
+University students. It provides a campus-tailored marketplace where students buy everyday
 essentials — stationery, snacks, drinks, detergent, and sanitary items —
 directly from other students acting as sellers, filtered by which of the
 six AAU campuses (4 Kilo, 5 Kilo, 6 Kilo, Mexico, Sefer Selam, Ledeta) the
@@ -29,29 +29,16 @@ organized and searchable.
 
 ## Main Features
 
-- **Student login** validated against a campus ID (`UGR/1234/24` format),
-  authenticated through the Node.js/Express backend with JWT tokens
-- **Unified product marketplace** — campus products (Stationery, Snacks,
-  Drinks, Detergent, Sanitary) listed by real student sellers, managed
-  through the backend API and PostgreSQL database
-- **Campus-based filtering** — products and sellers shown are scoped to the
-  student's selected campus, with an option to browse other campuses before
-  deciding whether to order
-- **Category browsing and search by product title**
-- **Product details** with price, stock, seller info, and ratings
-- **Seller profiles** with campus, department, contact (call/message), and
-  student-submitted reviews
-- **Shopping cart** with quantity management and per-item notes for the
-  seller (e.g. brand preference), persisted locally so it survives an app
-  restart
-- **Buy Now** — skip the cart and check out a single product immediately
-- **Checkout** with payment methods (Cash, Telebirr, CBE Birr,
-  Pay on Delivery) and a choice between **Delivery** (flat 20 Birr fee) and
-  **Pickup** (free collection directly from the seller on campus)
-- **Order history** with delivery/pickup status tracking
-- **User profile & account settings** with student profile info, campus affiliation, and credentials management
-- Proper loading, empty, and error states throughout, with retry on failure
-- Built with Flutter, Dart, Material 3, and Riverpod for state management
+- **Student Authentication** validated against campus credentials, authenticated through the Node.js/Express backend with JWT tokens (`accessToken` and `refreshToken`).
+- **Unified Product Marketplace** — Campus products across categories (Stationery, Snacks, Drinks, Detergent, Sanitary, Electronics, Books, Clothing) listed by student sellers and managed through PostgreSQL.
+- **Campus-Based Scoping** — Scoped to AAU campuses: 4 Kilo, 5 Kilo, 6 Kilo, Mexico, Sefer Selam, Ledeta.
+- **Category Browsing & Live Search** — Instant debounced search and category filtering.
+- **Product Details & Stock Tracking** — Live stock availability, unit prices in ETB, and seller info.
+- **Persistent Shopping Cart** — LocalStorage persistence surviving browser refreshes, with item counter and quantity controls.
+- **Order Checkout & Payment** — Multi-step checkout supporting fulfillment (Pickup or Campus Delivery) and payment methods (Cash on Delivery/Pickup, Telebirr, CBE Birr, Mock Payment).
+- **Order History & Real-Time Tracking** — Buyer order history with status lifecycle (PENDING, CONFIRMED, PREPARING, READY, ACCEPTED, COMPLETED, CANCELLED).
+- **Administrative Control Panel** — Full web dashboard for administrators: live KPI stats, user account moderation (Activate, Suspend, Deactivate), order monitoring across campuses, dispute resolution for student complaints, inventory stock/price management, and audit trail.
+- **Resilient UI States** — Accessible ARIA landmarks, loading skeletons, error states with retry, empty states, and responsive design.
 
 ## Submission Details
 
@@ -63,61 +50,114 @@ organized and searchable.
 
 ## Architecture
 
-AAU Campus Market is a **tri-stack** project:
+AAU Campus Market is a **tri-stack** architecture sharing a single REST API:
 
-| Layer | Technology | Location |
-|---|---|---|
-| 📱 Mobile App | Flutter + Dart + Riverpod | `lib/` (project root) |
-| ⚙️ Backend API | Node.js + Express + TypeScript + Drizzle ORM | `backend/` |
-| 🗄️ Database | PostgreSQL (via Docker Compose) | `backend/src/db/` |
-| 🌐 Web App *(planned)* | React + TypeScript + Vite | `frontend-web/` |
+| Layer | Technology | Directory | Status |
+|---|---|---|---|
+| 🌐 Web App | React 18 + TypeScript + Vite | `frontend-web/` | ✅ Production Ready (Sprints 3–8) |
+| ⚙️ Backend API | Node.js + Express + TypeScript + Drizzle ORM | `backend/` | ✅ Active (v1 API) |
+| 🗄️ Database | PostgreSQL 16 (Docker Compose) | `backend/src/db/` | ✅ Active |
+| 📱 Mobile App | Flutter + Dart + Riverpod | Root (`lib/`) | 📱 Mobile Client |
 
-The Flutter mobile app and the future React web app are **independent clients** that both consume the same backend REST API at `http://localhost:4000/api/v1`.
+All clients communicate with the backend REST API at `/api/v1` (`http://localhost:4000/api/v1` in development).
 
 ---
 
-## DevOps Practical Assignment Setup
+## Getting Started
 
-### 1. Building the Backend Docker Image
-To build the Docker image for the Node.js + Express backend from the root directory:
+### Prerequisites
+
+- **Node.js** v20+ (tested on v24.18.0)
+- **npm** v10+ (tested on v11.16.0)
+- **Docker & Docker Compose** (for PostgreSQL database)
+- **Flutter SDK** v3.19+ (optional, for mobile app development)
+
+### 1. Database & Backend Setup
+
+Navigate to the `backend/` directory:
+
 ```bash
-docker build -t YOUR_DOCKERHUB_USERNAME/aau-campus-market-backend:1.0 .
+cd backend
+npm install
 ```
 
-### 2. Running with Docker Compose
-To start the backend and PostgreSQL services together in detached mode:
-```bash
-docker compose up -d --build
-```
-To stop the services and retain database data:
-```bash
-docker compose down
-```
-To stop the services and remove the database volume:
-```bash
-docker compose down -v
+Configure your environment variables in `backend/.env` (or copy from `.env.example`):
+```env
+PORT=4000
+NODE_ENV=development
+DATABASE_URL=postgres://aau_market_user:aau_market_pass@localhost:5432/aau_campus_market_db
+JWT_ACCESS_SECRET=your_jwt_access_secret_key_here
+JWT_REFRESH_SECRET=your_jwt_refresh_secret_key_here
+JWT_ACCESS_EXPIRY=15m
+JWT_REFRESH_EXPIRY=7d
+CORS_ORIGIN=*
 ```
 
-### 3. Database Connectivity
-The backend connects to PostgreSQL using environment variables:
-* **Host**: `DB_HOST=db` inside Docker Compose (uses Docker service name resolution).
-* **Port**: `DB_PORT=5432`
-* **Database Name**: `DB_NAME=aau_campus_market_db`
-* **Health Check**: `GET /health` runs a `SELECT NOW()` query to verify live DB connectivity.
-
-### 4. Docker Hub Image Tagging & Pushing
-Tag and push the image to Docker Hub:
+Start PostgreSQL using Docker Compose:
 ```bash
-docker login
-docker tag YOUR_DOCKERHUB_USERNAME/aau-campus-market-backend:1.0 YOUR_DOCKERHUB_USERNAME/aau-campus-market-backend:1.0
-docker push YOUR_DOCKERHUB_USERNAME/aau-campus-market-backend:1.0
+docker compose up -d db
 ```
 
-### 5. GitHub Actions CI/CD Workflow
-The repository includes `.github/workflows/ci-cd.yml` which triggers automatically on every push or pull request to `main`/`master`:
-1. Checks out repository source code.
-2. Sets up Node.js environment.
-3. Installs backend dependencies (`npm ci`).
-4. Runs backend unit tests (`npm test`).
-5. Validates Docker image build (`docker build`).
+Run database migrations and seed default data:
+```bash
+npm run db:push
+npm run db:seed
+```
 
+Start the backend server in development mode:
+```bash
+npm run dev
+# The API will be available at http://localhost:4000/api/v1
+# Swagger documentation is accessible at http://localhost:4000/api/v1/docs
+```
+
+Run backend unit tests:
+```bash
+npm test -- tests/unit
+```
+
+### 2. Web Frontend Setup
+
+Navigate to the `frontend-web/` directory:
+
+```bash
+cd frontend-web
+npm install
+```
+
+Start the Vite development server:
+```bash
+npm run dev
+# The web app will launch at http://localhost:5173
+```
+
+Run the frontend test suite:
+```bash
+npx vitest run
+```
+
+Run TypeScript verification and production build:
+```bash
+npm run typecheck
+npm run build
+```
+
+---
+
+## Known Boundaries & Documented Limitations (MVP)
+
+1. **Role Model**: The database `users.role` enum supports `'ADMIN' | 'SELLER' | 'BUYER'`. The `DELIVERY_WORKER` role is not supported in the existing database schema; delivery coordination features are documented as blocked pending a future schema migration.
+2. **Single-Seller Checkout**: In the current MVP checkout implementation, an order is placed against a single seller (`items[0].product.seller_id`). Multi-seller cart split is documented for future release.
+3. **Discounts & Special Requests**: Discount campaigns and special request workflows are not backed by tables in the database schema and are disabled/noted in the admin dashboard.
+4. **Currency**: All pricing, fees, and revenue are strictly denominated in Ethiopian Birr (`ETB`).
+
+---
+
+## CI/CD Workflow
+
+The repository includes `.github/workflows/ci-cd.yml` which triggers automatically on pushes and pull requests to `main`:
+1. Source checkout.
+2. Node.js environment setup.
+3. Backend dependencies installation (`npm ci`).
+4. Unit test verification (`npm test`).
+5. Docker image container build validation (`docker build`).

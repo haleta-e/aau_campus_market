@@ -408,7 +408,7 @@ As a buyer or authorized administrator, I want cancellations to follow clear rul
 ### PB-018: Administrator product management
 
 **Priority:** P0
-**Status:** Needs Verification
+**Status:** Implemented
 
 **User story**
 
@@ -426,7 +426,7 @@ As an administrator, I want to create, update, and deactivate products so that t
 ### PB-019: Authoritative stock management
 
 **Priority:** P0
-**Status:** Needs Verification
+**Status:** Implemented
 
 **User story**
 
@@ -798,7 +798,7 @@ As an eligible buyer, I want to submit a review so that I can share feedback abo
 ### PB-038: Submit and manage complaints
 
 **Priority:** P1
-**Status:** Needs Verification
+**Status:** Implemented
 
 **User story**
 
@@ -821,7 +821,7 @@ As a user, I want to report a marketplace problem so that the responsible admini
 ### PB-039: Administrative dashboard
 
 **Priority:** P1
-**Status:** Needs Verification
+**Status:** Implemented
 
 **User story**
 
@@ -838,7 +838,7 @@ As an administrator, I want a dashboard showing important marketplace informatio
 ### PB-040: Manage users and operational roles
 
 **Priority:** P1
-**Status:** Needs Verification
+**Status:** Implemented
 
 **User story**
 
@@ -855,7 +855,7 @@ As an administrator, I want to review user accounts and operational roles so tha
 ### PB-041: Audit important operations
 
 **Priority:** P1
-**Status:** Needs Verification
+**Status:** Implemented
 
 **User story**
 
@@ -951,7 +951,7 @@ As a buyer, I want to browse products and place orders through the web interface
 ### PB-046: Implement role-specific web interfaces
 
 **Priority:** P2
-**Status:** Needs Verification
+**Status:** Implemented
 
 **User story**
 
