@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { getAdminStats } from '../services/adminService';
-import type { AdminStats } from '../types/admin';
+import { useState, useEffect, useCallback } from 'react';
+import { getAdminStats, getAdminUsers, updateUserStatus } from '../services/adminService';
+import type { AdminStats, AdminUser } from '../types/admin';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -86,6 +86,167 @@ export function OverviewPanel() {
   );
 }
 
+// ─── Users panel ─────────────────────────────────────────────────────────────
+
+export function UsersPanel() {
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [updating, setUpdating] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [filterRole, setFilterRole] = useState<string>('');
+  const [filterStatus, setFilterStatus] = useState<string>('');
+  const [search, setSearch] = useState('');
+
+  const load = useCallback(() => {
+    setLoading(true);
+    setError(null);
+    getAdminUsers()
+      .then(setUsers)
+      .catch((e) => setError(e.message ?? 'Failed to load users'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const handleStatusChange = async (userId: string, newStatus: 'ACTIVE' | 'SUSPENDED' | 'DEACTIVATED') => {
+    setUpdating(userId);
+    setActionError(null);
+    try {
+      const updated = await updateUserStatus(userId, { status: newStatus });
+      setUsers((prev) => prev.map((u) => (u.id === updated.id ? { ...u, status: updated.status } : u)));
+    } catch (e: any) {
+      setActionError(e.message ?? 'Status update failed');
+    } finally {
+      setUpdating(null);
+    }
+  };
+
+  const filtered = users.filter((u) => {
+    if (filterRole && u.role !== filterRole) return false;
+    if (filterStatus && u.status !== filterStatus) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      return u.username.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
+    }
+    return true;
+  });
+
+  return (
+    <section aria-labelledby="admin-users-heading">
+      <h2 id="admin-users-heading" className="admin-section-title">User Management</h2>
+      {actionError && <p className="admin-error">⚠ {actionError}</p>}
+      <div className="admin-filter-bar">
+        <input
+          type="search"
+          placeholder="Search username or email…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="admin-input"
+          aria-label="Search users"
+        />
+        <select
+          value={filterRole}
+          onChange={(e) => setFilterRole(e.target.value)}
+          className="admin-select"
+          aria-label="Filter by role"
+        >
+          <option value="">All roles</option>
+          <option value="ADMIN">Admin</option>
+          <option value="SELLER">Seller</option>
+          <option value="BUYER">Buyer</option>
+        </select>
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          className="admin-select"
+          aria-label="Filter by status"
+        >
+          <option value="">All statuses</option>
+          <option value="ACTIVE">Active</option>
+          <option value="SUSPENDED">Suspended</option>
+          <option value="DEACTIVATED">Deactivated</option>
+        </select>
+        <button className="admin-btn admin-btn-secondary" onClick={load} aria-label="Refresh users">
+          ↻ Refresh
+        </button>
+      </div>
+      {loading ? (
+        <p className="admin-loading">Loading users…</p>
+      ) : error ? (
+        <p className="admin-error">⚠ {error}</p>
+      ) : (
+        <div className="admin-table-wrapper">
+          <table className="admin-table" aria-label="Registered users">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Store</th>
+                <th>Status</th>
+                <th>Joined</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.length === 0 ? (
+                <tr><td colSpan={7} className="admin-empty-row">No users match the filter.</td></tr>
+              ) : (
+                filtered.map((u) => (
+                  <tr key={u.id}>
+                    <td>{u.username}</td>
+                    <td>{u.email}</td>
+                    <td><span className={statusBadge(u.role)}>{u.role}</span></td>
+                    <td>{u.store_name ?? '—'}</td>
+                    <td><span className={statusBadge(u.status)}>{u.status}</span></td>
+                    <td>{new Date(u.created_at).toLocaleDateString()}</td>
+                    <td>
+                      {u.role === 'ADMIN' ? (
+                        <span className="admin-muted">Protected</span>
+                      ) : updating === u.id ? (
+                        <span className="admin-muted">Saving…</span>
+                      ) : (
+                        <div className="admin-action-group">
+                          {u.status !== 'ACTIVE' && (
+                            <button
+                              className="admin-btn admin-btn-sm admin-btn-success"
+                              onClick={() => handleStatusChange(u.id, 'ACTIVE')}
+                            >
+                              Activate
+                            </button>
+                          )}
+                          {u.status === 'ACTIVE' && (
+                            <button
+                              className="admin-btn admin-btn-sm admin-btn-warning"
+                              onClick={() => handleStatusChange(u.id, 'SUSPENDED')}
+                            >
+                              Suspend
+                            </button>
+                          )}
+                          {u.status !== 'DEACTIVATED' && (
+                            <button
+                              className="admin-btn admin-btn-sm admin-btn-danger"
+                              onClick={() => handleStatusChange(u.id, 'DEACTIVATED')}
+                            >
+                              Deactivate
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+          <p className="admin-count">{filtered.length} user(s) shown of {users.length} total</p>
+        </div>
+      )}
+    </section>
+  );
+}
+
 // ─── Main Admin Dashboard Shell ───────────────────────────────────────────────
 
 export function AdminDashboard() {
@@ -125,6 +286,7 @@ export function AdminDashboard() {
 
       <div className="admin-tab-content">
         {tab === 'overview' && <OverviewPanel />}
+        {tab === 'users'    && <UsersPanel />}
       </div>
     </div>
   );
