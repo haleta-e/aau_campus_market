@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getAdminStats, getAdminUsers, updateUserStatus } from '../services/adminService';
-import type { AdminStats, AdminUser } from '../types/admin';
+import { getAdminStats, getAdminUsers, updateUserStatus, getAdminOrders } from '../services/adminService';
+import type { AdminStats, AdminUser, AdminOrder } from '../types/admin';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -247,6 +247,89 @@ export function UsersPanel() {
   );
 }
 
+
+// ─── Orders panel ─────────────────────────────────────────────────────────────
+
+export function OrdersPanel() {
+  const [orders, setOrders] = useState<AdminOrder[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [filterStatus, setFilterStatus] = useState('');
+
+  useEffect(() => {
+    getAdminOrders()
+      .then(setOrders)
+      .catch((e) => setError(e.message ?? 'Failed to load orders'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filtered = filterStatus
+    ? orders.filter((o) => o.status === filterStatus)
+    : orders;
+
+  const statusOptions = ['PENDING','CONFIRMED','PREPARING','READY','ACCEPTED','COMPLETED','CANCELLED'];
+
+  return (
+    <section aria-labelledby="admin-orders-heading">
+      <h2 id="admin-orders-heading" className="admin-section-title">Order Monitoring</h2>
+      <div className="admin-filter-bar">
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          className="admin-select"
+          aria-label="Filter by order status"
+        >
+          <option value="">All statuses</option>
+          {statusOptions.map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
+      </div>
+      {loading ? (
+        <p className="admin-loading">Loading orders…</p>
+      ) : error ? (
+        <p className="admin-error">⚠ {error}</p>
+      ) : (
+        <div className="admin-table-wrapper">
+          <table className="admin-table" aria-label="All orders">
+            <thead>
+              <tr>
+                <th>Order #</th>
+                <th>Buyer</th>
+                <th>Store</th>
+                <th>Status</th>
+                <th>Payment</th>
+                <th>Total (ETB)</th>
+                <th>Placed</th>
+                <th>Completed</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.length === 0 ? (
+                <tr><td colSpan={8} className="admin-empty-row">No orders found.</td></tr>
+              ) : (
+                filtered.map((o) => (
+                  <tr key={o.id}>
+                    <td className="admin-mono">{o.order_number}</td>
+                    <td>{o.buyer_username ?? o.buyer_email ?? '—'}</td>
+                    <td>{o.store_name ?? '—'}</td>
+                    <td><span className={statusBadge(o.status)}>{o.status}</span></td>
+                    <td><span className={statusBadge(o.payment_status)}>{o.payment_status}</span></td>
+                    <td>{formatETB(o.total_amount)}</td>
+                    <td>{new Date(o.created_at).toLocaleDateString()}</td>
+                    <td>{o.completed_at ? new Date(o.completed_at).toLocaleDateString() : '—'}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+          <p className="admin-count">{filtered.length} order(s) shown of {orders.length} total</p>
+        </div>
+      )}
+    </section>
+  );
+}
+
 // ─── Main Admin Dashboard Shell ───────────────────────────────────────────────
 
 export function AdminDashboard() {
@@ -287,6 +370,7 @@ export function AdminDashboard() {
       <div className="admin-tab-content">
         {tab === 'overview' && <OverviewPanel />}
         {tab === 'users'    && <UsersPanel />}
+        {tab === 'orders'   && <OrdersPanel />}
       </div>
     </div>
   );
