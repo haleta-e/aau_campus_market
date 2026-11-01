@@ -9,7 +9,8 @@ export type AppView =
   | 'checkout'
   | 'orders'
   | 'order-confirmation'
-  | 'order-detail';
+  | 'order-detail'
+  | 'admin';
 
 interface HeaderProps {
   currentView: AppView;
@@ -22,7 +23,7 @@ export function Header({ currentView, onNavigate }: HeaderProps) {
 
   const handleLogout = async () => {
     await logout();
-    if (currentView === 'orders' || currentView === 'checkout') {
+    if (currentView === 'orders' || currentView === 'checkout' || currentView === 'admin') {
       onNavigate('catalogue');
     }
   };
@@ -88,6 +89,16 @@ export function Header({ currentView, onNavigate }: HeaderProps) {
                 >
                   📋 My Orders
                 </button>
+                {user.role === 'ADMIN' && (
+                  <button
+                    type="button"
+                    className={`nav-btn btn-admin-nav ${currentView === 'admin' ? 'active' : ''}`}
+                    onClick={() => onNavigate('admin')}
+                    aria-label="Open Admin Dashboard"
+                  >
+                    🛡 Admin
+                  </button>
+                )}
                 <div className="user-profile-badge" title={`Signed in as ${user.email}`}>
                   <span className="user-name">👤 {user.username}</span>
                   <span className={`role-badge role-${user.role.toLowerCase()}`}>{user.role}</span>

@@ -2213,3 +2213,414 @@
   color: var(--primary);
   font-size: 1.125rem;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SPRINT 8 — Admin Dashboard Styles
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Dashboard shell ─────────────────────────────────────────────────────── */
+.admin-dashboard {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  font-size: 0.925rem;
+}
+
+.admin-dashboard-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--primary);
+}
+
+.admin-dashboard-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin: 0 0 0.25rem;
+}
+
+.admin-dashboard-subtitle {
+  color: var(--text-secondary);
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+/* ── Tab navigation ──────────────────────────────────────────────────────── */
+.admin-tab-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 0.5rem;
+}
+
+.admin-tab-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius) var(--radius) 0 0;
+  padding: 0.45rem 0.875rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.admin-tab-btn:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.admin-tab-active {
+  background: var(--primary) !important;
+  color: #ffffff !important;
+  border-color: var(--primary) !important;
+  font-weight: 600;
+}
+
+/* ── Section heading ─────────────────────────────────────────────────────── */
+.admin-section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 1rem;
+}
+
+/* ── KPI Grid ────────────────────────────────────────────────────────────── */
+.admin-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.admin-kpi-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-kpi-icon {
+  font-size: 1.75rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.admin-kpi-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--primary);
+  line-height: 1.1;
+}
+
+.admin-kpi-label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 0.2rem;
+}
+
+/* ── Filter bar ──────────────────────────────────────────────────────────── */
+.admin-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  align-items: center;
+}
+
+.admin-input {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.4rem 0.75rem;
+  font-size: 0.875rem;
+  min-width: 180px;
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+.admin-input:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+.admin-select {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.4rem 0.75rem;
+  font-size: 0.875rem;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.admin-textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  resize: vertical;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  box-sizing: border-box;
+}
+
+/* ── Table ───────────────────────────────────────────────────────────────── */
+.admin-table-wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.admin-table th {
+  background: var(--bg-secondary);
+  padding: 0.6rem 0.875rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.admin-table td {
+  padding: 0.55rem 0.875rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.admin-table tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-table tr:hover td {
+  background: var(--bg-secondary);
+}
+
+.admin-row-oos {
+  background: #fff8f0 !important;
+}
+
+.admin-empty-row {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 1.5rem !important;
+  font-style: italic;
+}
+
+.admin-mono {
+  font-family: monospace;
+  font-size: 0.8rem;
+}
+
+.admin-resolution-cell {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Badges ──────────────────────────────────────────────────────────────── */
+.admin-badge {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.badge-active    { background: #d1fae5; color: #065f46; }
+.badge-suspended { background: #fef3c7; color: #92400e; }
+.badge-deactivated { background: #f3f4f6; color: #6b7280; }
+.badge-pending   { background: #dbeafe; color: #1e40af; }
+.badge-confirmed { background: #e0f2fe; color: #0369a1; }
+.badge-preparing { background: #fef9c3; color: #854d0e; }
+.badge-ready     { background: #d1fae5; color: #065f46; }
+.badge-completed { background: #dcfce7; color: #15803d; }
+.badge-cancelled { background: #fee2e2; color: #b91c1c; }
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+.admin-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.45rem 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.admin-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.admin-btn:active:not(:disabled) { transform: scale(0.97); }
+
+.admin-btn-sm     { padding: 0.3rem 0.6rem; font-size: 0.8rem; }
+
+.admin-btn-primary   { background: var(--primary); color: #fff; }
+.admin-btn-secondary { background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border); }
+.admin-btn-success   { background: #16a34a; color: #fff; }
+.admin-btn-warning   { background: #d97706; color: #fff; }
+.admin-btn-danger    { background: #dc2626; color: #fff; }
+
+.admin-btn-primary:hover:not(:disabled)   { opacity: 0.88; }
+.admin-btn-secondary:hover:not(:disabled) { background: #e5e7eb; }
+.admin-btn-success:hover:not(:disabled)   { opacity: 0.88; }
+.admin-btn-warning:hover:not(:disabled)   { opacity: 0.88; }
+.admin-btn-danger:hover:not(:disabled)    { opacity: 0.88; }
+
+/* ── Action group ────────────────────────────────────────────────────────── */
+.admin-action-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+/* ── Modal ───────────────────────────────────────────────────────────────── */
+.admin-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.admin-modal {
+  background: var(--bg-card);
+  border-radius: calc(var(--radius) * 1.5);
+  padding: 1.75rem;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.admin-modal h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.125rem;
+  color: var(--text-primary);
+}
+
+.admin-modal-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* ── Label ───────────────────────────────────────────────────────────────── */
+.admin-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+/* ── Misc helpers ────────────────────────────────────────────────────────── */
+.admin-loading { color: var(--text-secondary); font-style: italic; margin: 1rem 0; }
+.admin-error   { color: #dc2626; background: #fee2e2; padding: 0.6rem 0.875rem; border-radius: var(--radius); margin: 0.75rem 0; }
+.admin-muted   { color: var(--text-secondary); font-size: 0.8rem; }
+.admin-count   { font-size: 0.8rem; color: var(--text-secondary); margin: 0.5rem 0 0; text-align: right; }
+.admin-note    { font-size: 0.8rem; color: var(--text-secondary); font-style: italic; }
+
+.admin-action-tag {
+  background: #f3f4f6;
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.78rem;
+  font-family: monospace;
+}
+
+/* ── Pagination ──────────────────────────────────────────────────────────── */
+.admin-pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+}
+
+/* ── Alert ───────────────────────────────────────────────────────────────── */
+.admin-alert {
+  padding: 0.65rem 1rem;
+  border-radius: var(--radius);
+  margin-bottom: 0.875rem;
+  font-size: 0.875rem;
+}
+
+.admin-alert-warning {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+/* ── Blocked notice ──────────────────────────────────────────────────────── */
+.admin-blocked-notice {
+  margin-top: 2.5rem;
+  padding: 1.25rem;
+  background: #f8f9fa;
+  border: 1px dashed #9ca3af;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.admin-blocked-notice h3 {
+  font-size: 1rem;
+  margin: 0 0 0.625rem;
+  color: var(--text-primary);
+}
+
+.admin-blocked-notice ul {
+  margin: 0 0 0.75rem 1rem;
+}
+
+.admin-blocked-notice li {
+  margin-bottom: 0.4rem;
+}
+
+/* ── Tab content container ───────────────────────────────────────────────── */
+.admin-tab-content {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Admin nav button in Header ─────────────────────────────────────────── */
+.btn-admin-nav {
+  background: linear-gradient(135deg, var(--primary) 0%, #1e3a6f 100%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-admin-nav:hover {
+  background: linear-gradient(135deg, #1e3a6f 0%, var(--primary) 100%);
+}

@@ -18,6 +18,7 @@ import { CheckoutPage } from './components/CheckoutPage';
 import { OrderConfirmation } from './components/OrderConfirmation';
 import { OrderHistoryPage } from './components/OrderHistoryPage';
 import { OrderDetailView } from './components/OrderDetailView';
+import { AdminDashboard } from './components/AdminDashboard';
 import { PlacedOrderConfirmation } from './types/order';
 import './App.css';
 
@@ -39,7 +40,7 @@ const AAU_CAMPUSES = [
 ];
 
 export function AppContent() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   const [currentView, setCurrentView] = useState<AppView>('catalogue');
   const [redirectAfterLogin, setRedirectAfterLogin] = useState<AppView | null>(null);
@@ -178,6 +179,15 @@ export function AppContent() {
       return;
     }
 
+    // Admin route guard: only ADMIN role may access admin dashboard
+    if (view === 'admin' && (!isAuthenticated || user?.role !== 'ADMIN')) {
+      setRedirectAfterLogin(null);
+      setLoginMessage('Administrator access is required to view that page.');
+      setCurrentView('login');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     setLoginMessage(undefined);
     setCurrentView(view);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -252,6 +262,8 @@ export function AppContent() {
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
           />
+        ) : currentView === 'admin' && user?.role === 'ADMIN' ? (
+          <AdminDashboard />
         ) : currentView === 'details' && selectedProductId ? (
           <ProductDetails
             productId={selectedProductId}
