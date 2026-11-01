@@ -1,12 +1,31 @@
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
+
+export type AppView =
+  | 'catalogue'
+  | 'details'
+  | 'cart'
+  | 'login'
+  | 'checkout'
+  | 'orders'
+  | 'order-confirmation'
+  | 'order-detail';
 
 interface HeaderProps {
-  currentView: 'catalogue' | 'details' | 'cart';
-  onNavigate: (view: 'catalogue' | 'cart') => void;
+  currentView: AppView;
+  onNavigate: (view: AppView) => void;
 }
 
 export function Header({ currentView, onNavigate }: HeaderProps) {
   const { totalItems } = useCart();
+  const { user, isAuthenticated, logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    if (currentView === 'orders' || currentView === 'checkout') {
+      onNavigate('catalogue');
+    }
+  };
 
   return (
     <header className="site-header">
@@ -58,6 +77,40 @@ export function Header({ currentView, onNavigate }: HeaderProps) {
               <span>🛒 Cart</span>
               {totalItems > 0 && <span className="cart-counter-badge">{totalItems}</span>}
             </button>
+
+            {isAuthenticated && user ? (
+              <div className="auth-nav-cluster" data-testid="auth-user-menu">
+                <button
+                  type="button"
+                  className={`nav-btn ${currentView === 'orders' ? 'active' : ''}`}
+                  onClick={() => onNavigate('orders')}
+                  aria-label="View My Orders"
+                >
+                  📋 My Orders
+                </button>
+                <div className="user-profile-badge" title={`Signed in as ${user.email}`}>
+                  <span className="user-name">👤 {user.username}</span>
+                  <span className={`role-badge role-${user.role.toLowerCase()}`}>{user.role}</span>
+                </div>
+                <button
+                  type="button"
+                  className="nav-btn btn-logout"
+                  onClick={handleLogout}
+                  aria-label="Sign out of your account"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className={`nav-btn btn-login-nav ${currentView === 'login' ? 'active' : ''}`}
+                onClick={() => onNavigate('login')}
+                aria-label="Sign in to your student account"
+              >
+                Sign In
+              </button>
+            )}
           </nav>
         </div>
       </div>

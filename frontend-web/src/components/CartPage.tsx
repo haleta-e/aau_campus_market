@@ -2,9 +2,10 @@ import { useCart } from '../context/CartContext';
 
 interface CartPageProps {
   onContinueShopping: () => void;
+  onProceedToCheckout?: () => void;
 }
 
-export function CartPage({ onContinueShopping }: CartPageProps) {
+export function CartPage({ onContinueShopping, onProceedToCheckout }: CartPageProps) {
   const {
     items,
     updateQuantity,
@@ -183,6 +184,15 @@ export function CartPage({ onContinueShopping }: CartPageProps) {
           </div>
 
           <div className="summary-actions">
+            {onProceedToCheckout && (
+              <button
+                type="button"
+                className="checkout-btn"
+                onClick={onProceedToCheckout}
+              >
+                Proceed to Checkout →
+              </button>
+            )}
             <button
               type="button"
               className="continue-shopping-btn"

@@ -170,4 +170,126 @@ describe('App Component - Product Catalogue & Interaction', () => {
       expect(screen.getByText('Catalogue Is Currently Empty')).toBeInTheDocument();
     });
   });
+
+  it('navigates to login page when Sign In is clicked and cancels back to catalogue', async () => {
+    vi.spyOn(productService, 'getProducts').mockResolvedValueOnce({
+      status: 'success',
+      data: mockProducts,
+      pagination: { page: 1, limit: 20, total: 3, totalPages: 1 },
+    });
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText('USB Flash Drive 64GB High Speed')).toBeInTheDocument();
+    });
+
+    // Click Sign In button in header
+    fireEvent.click(screen.getByRole('button', { name: /Sign In to your student account/i }));
+
+    // Login page renders
+    expect(screen.getByTestId('login-page')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Sign In to AAU Campus Market/i })).toBeInTheDocument();
+
+    // Cancel back to catalogue
+    fireEvent.click(screen.getByRole('button', { name: /Cancel/i }));
+
+    expect(screen.getByText('USB Flash Drive 64GB High Speed')).toBeInTheDocument();
+  });
+
+  it('renders authenticated user badge in header and supports sign out', async () => {
+    localStorage.setItem(
+      'aau_campus_market_auth',
+      JSON.stringify({
+        token: 'test-token',
+        refreshToken: 'refresh-token',
+        user: {
+          id: 'u-1',
+          username: 'dawit_k',
+          email: 'dawit@aau.edu.et',
+          role: 'BUYER',
+          status: 'ACTIVE',
+        },
+      })
+    );
+
+    vi.spyOn(productService, 'getProducts').mockResolvedValueOnce({
+      status: 'success',
+      data: mockProducts,
+      pagination: { page: 1, limit: 20, total: 3, totalPages: 1 },
+    });
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('auth-user-menu')).toBeInTheDocument();
+      expect(screen.getByText(/dawit_k/)).toBeInTheDocument();
+      expect(screen.getByText('BUYER')).toBeInTheDocument();
+    });
+
+    // Click Sign Out
+    fireEvent.click(screen.getByRole('button', { name: /Sign Out/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Sign In/i })).toBeInTheDocument();
+      expect(screen.queryByTestId('auth-user-menu')).not.toBeInTheDocument();
+    });
+  });
+
+  it('redirects to login with a message when unauthenticated user attempts to view orders', async () => {
+    localStorage.removeItem('aau_campus_market_auth');
+
+    vi.spyOn(productService, 'getProducts').mockResolvedValueOnce({
+      status: 'success',
+      data: mockProducts,
+      pagination: { page: 1, limit: 20, total: 3, totalPages: 1 },
+    });
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText('USB Flash Drive 64GB High Speed')).toBeInTheDocument();
+    });
+
+    // In unauthenticated state, if Cart is opened
+    const cartButton = screen.getByRole('button', { name: /Shopping Cart/i });
+    fireEvent.click(cartButton);
+
+    expect(screen.getByRole('heading', { name: /Your Shopping Cart is Empty/i })).toBeInTheDocument();
+  });
+
+  it('navigates to My Orders when authenticated user clicks My Orders button', async () => {
+    localStorage.setItem(
+      'aau_campus_market_auth',
+      JSON.stringify({
+        token: 'test-token',
+        refreshToken: 'refresh-token',
+        user: {
+          id: 'u-1',
+          username: 'dawit_k',
+          email: 'dawit@aau.edu.et',
+          role: 'BUYER',
+          status: 'ACTIVE',
+        },
+      })
+    );
+
+    vi.spyOn(productService, 'getProducts').mockResolvedValueOnce({
+      status: 'success',
+      data: mockProducts,
+      pagination: { page: 1, limit: 20, total: 3, totalPages: 1 },
+    });
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /My Orders/i })).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /My Orders/i }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('order-history-page')).toBeInTheDocument();
+    });
+  });
 });

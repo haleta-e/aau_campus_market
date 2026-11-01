@@ -3,7 +3,8 @@ import { Product, PaginationMeta } from './types/product';
 import { productService } from './services/productService';
 import { ApiError } from './config/api';
 import { CartProvider } from './context/CartContext';
-import { Header } from './components/Header';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { Header, AppView } from './components/Header';
 import { FilterBar, FilterState } from './components/FilterBar';
 import { ProductGrid } from './components/ProductGrid';
 import { LoadingSkeleton } from './components/LoadingSkeleton';
@@ -12,6 +13,12 @@ import { EmptyState } from './components/EmptyState';
 import { Pagination } from './components/Pagination';
 import { ProductDetails } from './components/ProductDetails';
 import { CartPage } from './components/CartPage';
+import { LoginPage } from './components/LoginPage';
+import { CheckoutPage } from './components/CheckoutPage';
+import { OrderConfirmation } from './components/OrderConfirmation';
+import { OrderHistoryPage } from './components/OrderHistoryPage';
+import { OrderDetailView } from './components/OrderDetailView';
+import { PlacedOrderConfirmation } from './types/order';
 import './App.css';
 
 const INITIAL_FILTERS: FilterState = {
@@ -32,9 +39,17 @@ const AAU_CAMPUSES = [
 ];
 
 export function AppContent() {
-  const [currentView, setCurrentView] = useState<'catalogue' | 'details' | 'cart'>('catalogue');
+  const { isAuthenticated } = useAuth();
+
+  const [currentView, setCurrentView] = useState<AppView>('catalogue');
+  const [redirectAfterLogin, setRedirectAfterLogin] = useState<AppView | null>(null);
+  const [loginMessage, setLoginMessage] = useState<string | undefined>(undefined);
+
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | undefined>(undefined);
+
+  const [orderConfirmation, setOrderConfirmation] = useState<PlacedOrderConfirmation | null>(null);
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
   const [products, setProducts] = useState<Product[]>([]);
   const [pagination, setPagination] = useState<PaginationMeta | null>(null);
@@ -149,8 +164,30 @@ export function AppContent() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleNavigate = (view: 'catalogue' | 'cart') => {
+  const handleNavigate = (view: AppView) => {
+    // Route guard: protected views require authentication
+    if ((view === 'checkout' || view === 'orders' || view === 'order-detail') && !isAuthenticated) {
+      setRedirectAfterLogin(view === 'order-detail' ? 'orders' : view);
+      setLoginMessage(
+        view === 'checkout'
+          ? 'Please sign in to proceed with your order checkout.'
+          : 'Please sign in to view your orders.'
+      );
+      setCurrentView('login');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    setLoginMessage(undefined);
     setCurrentView(view);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleLoginSuccess = () => {
+    const target = redirectAfterLogin || 'catalogue';
+    setRedirectAfterLogin(null);
+    setLoginMessage(undefined);
+    setCurrentView(target);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -165,8 +202,56 @@ export function AppContent() {
       <Header currentView={currentView} onNavigate={handleNavigate} />
 
       <main className="main-content">
-        {currentView === 'cart' ? (
-          <CartPage onContinueShopping={() => handleNavigate('catalogue')} />
+        {currentView === 'login' ? (
+          <LoginPage
+            onSuccess={handleLoginSuccess}
+            onCancel={() => handleNavigate('catalogue')}
+            message={loginMessage}
+          />
+        ) : currentView === 'cart' ? (
+          <CartPage
+            onContinueShopping={() => handleNavigate('catalogue')}
+            onProceedToCheckout={() => handleNavigate('checkout')}
+          />
+        ) : currentView === 'checkout' ? (
+          <CheckoutPage
+            onBackToCart={() => handleNavigate('cart')}
+            onOrderPlaced={(confirmation) => {
+              setOrderConfirmation(confirmation);
+              setCurrentView('order-confirmation');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        ) : currentView === 'order-confirmation' && orderConfirmation ? (
+          <OrderConfirmation
+            confirmation={orderConfirmation}
+            onContinueShopping={() => {
+              setOrderConfirmation(null);
+              handleNavigate('catalogue');
+            }}
+            onViewOrders={() => {
+              setOrderConfirmation(null);
+              handleNavigate('orders');
+            }}
+          />
+        ) : currentView === 'orders' ? (
+          <OrderHistoryPage
+            onViewDetail={(orderId) => {
+              setSelectedOrderId(orderId);
+              setCurrentView('order-detail');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onBack={() => handleNavigate('catalogue')}
+          />
+        ) : currentView === 'order-detail' && selectedOrderId ? (
+          <OrderDetailView
+            orderId={selectedOrderId}
+            onBack={() => {
+              setSelectedOrderId(null);
+              setCurrentView('orders');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
         ) : currentView === 'details' && selectedProductId ? (
           <ProductDetails
             productId={selectedProductId}
@@ -226,8 +311,10 @@ export function AppContent() {
 
 export default function App() {
   return (
-    <CartProvider>
-      <AppContent />
-    </CartProvider>
+    <AuthProvider>
+      <CartProvider>
+        <AppContent />
+      </CartProvider>
+    </AuthProvider>
   );
 }
