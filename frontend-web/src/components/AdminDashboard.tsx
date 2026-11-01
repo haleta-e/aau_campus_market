@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getAdminStats, getAdminUsers, updateUserStatus, getAdminOrders } from '../services/adminService';
-import type { AdminStats, AdminUser, AdminOrder } from '../types/admin';
+import { getAdminStats, getAdminUsers, updateUserStatus, getAdminOrders, getAdminComplaints, resolveComplaint } from '../services/adminService';
+import type { AdminStats, AdminUser, AdminOrder, AdminComplaint, ResolveComplaintPayload } from '../types/admin';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -330,6 +330,180 @@ export function OrdersPanel() {
   );
 }
 
+
+// ─── Complaints panel ─────────────────────────────────────────────────────────
+
+export function ComplaintsPanel() {
+  const [complaints, setComplaints] = useState<AdminComplaint[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [resolving, setResolving] = useState<string | null>(null);
+  const [resolveForm, setResolveForm] = useState<{ id: string; status: ResolveComplaintPayload['status']; resolution: string } | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [filterStatus, setFilterStatus] = useState('');
+
+  const load = useCallback(() => {
+    setLoading(true);
+    setError(null);
+    getAdminComplaints()
+      .then(setComplaints)
+      .catch((e) => setError(e.message ?? 'Failed to load complaints'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const handleResolve = async () => {
+    if (!resolveForm) return;
+    if (resolveForm.resolution.trim().length < 5) {
+      setActionError('Resolution notes must be at least 5 characters.');
+      return;
+    }
+    setResolving(resolveForm.id);
+    setActionError(null);
+    try {
+      const updated = await resolveComplaint(resolveForm.id, {
+        status: resolveForm.status,
+        resolution: resolveForm.resolution,
+      });
+      setComplaints((prev) =>
+        prev.map((c) => (c.id === updated.id ? { ...c, status: updated.status, resolution: updated.resolution } : c))
+      );
+      setResolveForm(null);
+    } catch (e: any) {
+      setActionError(e.message ?? 'Failed to resolve complaint');
+    } finally {
+      setResolving(null);
+    }
+  };
+
+  const filtered = filterStatus ? complaints.filter((c) => c.status === filterStatus) : complaints;
+
+  return (
+    <section aria-labelledby="admin-complaints-heading">
+      <h2 id="admin-complaints-heading" className="admin-section-title">Complaint Management</h2>
+      {actionError && <p className="admin-error">⚠ {actionError}</p>}
+      <div className="admin-filter-bar">
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          className="admin-select"
+          aria-label="Filter by complaint status"
+        >
+          <option value="">All statuses</option>
+          {['OPEN','UNDER_REVIEW','RESOLVED','REJECTED','CLOSED'].map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
+        <button className="admin-btn admin-btn-secondary" onClick={load}>↻ Refresh</button>
+      </div>
+      {loading ? (
+        <p className="admin-loading">Loading complaints…</p>
+      ) : error ? (
+        <p className="admin-error">⚠ {error}</p>
+      ) : (
+        <>
+          <div className="admin-table-wrapper">
+            <table className="admin-table" aria-label="All complaints">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Subject</th>
+                  <th>Priority</th>
+                  <th>Status</th>
+                  <th>Filed</th>
+                  <th>Resolution</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.length === 0 ? (
+                  <tr><td colSpan={7} className="admin-empty-row">No complaints found.</td></tr>
+                ) : (
+                  filtered.map((c) => (
+                    <tr key={c.id}>
+                      <td className="admin-mono">{c.complaint_number}</td>
+                      <td>{c.subject}</td>
+                      <td><span className={statusBadge(c.priority)}>{c.priority}</span></td>
+                      <td><span className={statusBadge(c.status)}>{c.status}</span></td>
+                      <td>{new Date(c.created_at).toLocaleDateString()}</td>
+                      <td className="admin-resolution-cell">{c.resolution ?? '—'}</td>
+                      <td>
+                        {['RESOLVED', 'REJECTED', 'CLOSED'].includes(c.status) ? (
+                          <span className="admin-muted">Done</span>
+                        ) : (
+                          <button
+                            className="admin-btn admin-btn-sm admin-btn-primary"
+                            onClick={() =>
+                              setResolveForm({ id: c.id, status: 'RESOLVED', resolution: '' })
+                            }
+                          >
+                            Resolve
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+            <p className="admin-count">{filtered.length} complaint(s) shown of {complaints.length} total</p>
+          </div>
+
+          {/* Resolve dialog */}
+          {resolveForm && (
+            <div className="admin-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="resolve-dialog-title">
+              <div className="admin-modal">
+                <h3 id="resolve-dialog-title">Resolve Complaint</h3>
+                <label className="admin-label" htmlFor="resolve-status">Outcome</label>
+                <select
+                  id="resolve-status"
+                  className="admin-select"
+                  value={resolveForm.status}
+                  onChange={(e) =>
+                    setResolveForm({ ...resolveForm, status: e.target.value as ResolveComplaintPayload['status'] })
+                  }
+                >
+                  <option value="UNDER_REVIEW">Under Review</option>
+                  <option value="RESOLVED">Resolved</option>
+                  <option value="REJECTED">Rejected</option>
+                  <option value="CLOSED">Closed</option>
+                </select>
+                <label className="admin-label" htmlFor="resolve-notes">
+                  Resolution Notes <span aria-hidden="true">(min 5 chars)</span>
+                </label>
+                <textarea
+                  id="resolve-notes"
+                  className="admin-textarea"
+                  rows={4}
+                  value={resolveForm.resolution}
+                  onChange={(e) => setResolveForm({ ...resolveForm, resolution: e.target.value })}
+                  aria-required="true"
+                />
+                <div className="admin-modal-actions">
+                  <button
+                    className="admin-btn admin-btn-primary"
+                    onClick={handleResolve}
+                    disabled={!!resolving}
+                  >
+                    {resolving ? 'Saving…' : 'Submit Resolution'}
+                  </button>
+                  <button
+                    className="admin-btn admin-btn-secondary"
+                    onClick={() => { setResolveForm(null); setActionError(null); }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </section>
+  );
+}
+
 // ─── Main Admin Dashboard Shell ───────────────────────────────────────────────
 
 export function AdminDashboard() {
@@ -371,6 +545,7 @@ export function AdminDashboard() {
         {tab === 'overview' && <OverviewPanel />}
         {tab === 'users'    && <UsersPanel />}
         {tab === 'orders'   && <OrdersPanel />}
+        {tab === 'complaints' && <ComplaintsPanel />}
       </div>
     </div>
   );
