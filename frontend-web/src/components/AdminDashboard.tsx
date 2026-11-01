@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getAdminStats, getAdminUsers, updateUserStatus, getAdminOrders, getAdminComplaints, resolveComplaint } from '../services/adminService';
+import { getAdminStats, getAdminUsers, updateUserStatus, getAdminOrders, getAdminComplaints, resolveComplaint, adminUpdateProduct, adminDeleteProduct } from '../services/adminService';
 import type { AdminStats, AdminUser, AdminOrder, AdminComplaint, ResolveComplaintPayload } from '../types/admin';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -504,6 +504,268 @@ export function ComplaintsPanel() {
   );
 }
 
+
+// ─── Products / Inventory panel ───────────────────────────────────────────────
+
+interface ProductRow {
+  id: string;
+  name: string;
+  category: string;
+  price: string;
+  stock_quantity: number;
+  status: 'ACTIVE' | 'INACTIVE';
+  campus_location?: string;
+  seller?: { store_name?: string };
+}
+
+export function ProductsPanel() {
+  const [products, setProducts] = useState<ProductRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [editRow, setEditRow] = useState<ProductRow | null>(null);
+  const [editForm, setEditForm] = useState<{ stock_quantity: string; price: string; status: 'ACTIVE' | 'INACTIVE' }>({
+    stock_quantity: '',
+    price: '',
+    status: 'ACTIVE',
+  });
+  const [saving, setSaving] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [filterStatus, setFilterStatus] = useState('');
+  const [search, setSearch] = useState('');
+
+  const load = useCallback(() => {
+    setLoading(true);
+    setError(null);
+    fetch(`${import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api/v1'}/products?limit=200`)
+      .then((r) => r.json())
+      .then((body) => setProducts(body.data ?? []))
+      .catch((e) => setError(e.message ?? 'Failed to load products'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const openEdit = (p: ProductRow) => {
+    setEditRow(p);
+    setEditForm({
+      stock_quantity: String(p.stock_quantity),
+      price: String(p.price),
+      status: p.status,
+    });
+    setActionError(null);
+  };
+
+  const handleSave = async () => {
+    if (!editRow) return;
+    const stockNum = parseInt(editForm.stock_quantity, 10);
+    const priceNum = parseFloat(editForm.price);
+    if (isNaN(stockNum) || stockNum < 0) {
+      setActionError('Stock quantity must be a non-negative integer.');
+      return;
+    }
+    if (isNaN(priceNum) || priceNum <= 0) {
+      setActionError('Price must be a positive number.');
+      return;
+    }
+    setSaving(true);
+    setActionError(null);
+    try {
+      await adminUpdateProduct(editRow.id, {
+        stock_quantity: stockNum,
+        price: priceNum,
+        status: editForm.status,
+      });
+      setProducts((prev) =>
+        prev.map((p) =>
+          p.id === editRow.id
+            ? { ...p, stock_quantity: stockNum, price: editForm.price, status: editForm.status }
+            : p
+        )
+      );
+      setEditRow(null);
+    } catch (e: any) {
+      setActionError(e.message ?? 'Failed to update product');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (p: ProductRow) => {
+    if (!window.confirm(`Deactivate product "${p.name}"? This hides it from buyers.`)) return;
+    setActionError(null);
+    try {
+      await adminDeleteProduct(p.id);
+      setProducts((prev) => prev.map((x) => (x.id === p.id ? { ...x, status: 'INACTIVE' } : x)));
+    } catch (e: any) {
+      setActionError(e.message ?? 'Failed to deactivate product');
+    }
+  };
+
+  const filtered = products.filter((p) => {
+    if (filterStatus && p.status !== filterStatus) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      return p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q);
+    }
+    return true;
+  });
+
+  const outOfStock = products.filter((p) => p.stock_quantity === 0 && p.status === 'ACTIVE').length;
+
+  return (
+    <section aria-labelledby="admin-products-heading">
+      <h2 id="admin-products-heading" className="admin-section-title">Inventory Management</h2>
+      {outOfStock > 0 && (
+        <div className="admin-alert admin-alert-warning" role="alert">
+          ⚠ {outOfStock} active product(s) are out of stock.
+        </div>
+      )}
+      {actionError && <p className="admin-error">⚠ {actionError}</p>}
+      <div className="admin-filter-bar">
+        <input
+          type="search"
+          placeholder="Search name or category…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="admin-input"
+          aria-label="Search products"
+        />
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          className="admin-select"
+          aria-label="Filter by product status"
+        >
+          <option value="">All</option>
+          <option value="ACTIVE">Active</option>
+          <option value="INACTIVE">Inactive</option>
+        </select>
+        <button className="admin-btn admin-btn-secondary" onClick={load}>↻ Refresh</button>
+      </div>
+      {loading ? (
+        <p className="admin-loading">Loading products…</p>
+      ) : error ? (
+        <p className="admin-error">⚠ {error}</p>
+      ) : (
+        <>
+          <div className="admin-table-wrapper">
+            <table className="admin-table" aria-label="Product inventory">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Category</th>
+                  <th>Price (ETB)</th>
+                  <th>Stock</th>
+                  <th>Status</th>
+                  <th>Store</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.length === 0 ? (
+                  <tr><td colSpan={7} className="admin-empty-row">No products found.</td></tr>
+                ) : (
+                  filtered.map((p) => (
+                    <tr key={p.id} className={p.stock_quantity === 0 && p.status === 'ACTIVE' ? 'admin-row-oos' : ''}>
+                      <td>{p.name}</td>
+                      <td>{p.category}</td>
+                      <td>{formatETB(p.price)}</td>
+                      <td>
+                        {p.stock_quantity === 0 ? (
+                          <span className={statusBadge('CANCELLED')}>Out of Stock</span>
+                        ) : (
+                          p.stock_quantity
+                        )}
+                      </td>
+                      <td><span className={statusBadge(p.status)}>{p.status}</span></td>
+                      <td>{(p.seller as any)?.store_name ?? '—'}</td>
+                      <td>
+                        <div className="admin-action-group">
+                          <button
+                            className="admin-btn admin-btn-sm admin-btn-primary"
+                            onClick={() => openEdit(p)}
+                            aria-label={`Edit ${p.name}`}
+                          >
+                            Edit
+                          </button>
+                          {p.status === 'ACTIVE' && (
+                            <button
+                              className="admin-btn admin-btn-sm admin-btn-danger"
+                              onClick={() => handleDelete(p)}
+                              aria-label={`Deactivate ${p.name}`}
+                            >
+                              Deactivate
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+            <p className="admin-count">{filtered.length} product(s) shown of {products.length} total</p>
+          </div>
+
+          {/* Edit dialog */}
+          {editRow && (
+            <div className="admin-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="edit-product-title">
+              <div className="admin-modal">
+                <h3 id="edit-product-title">Edit Product: {editRow.name}</h3>
+                <label className="admin-label" htmlFor="edit-stock">Stock Quantity</label>
+                <input
+                  id="edit-stock"
+                  type="number"
+                  min={0}
+                  className="admin-input"
+                  value={editForm.stock_quantity}
+                  onChange={(e) => setEditForm({ ...editForm, stock_quantity: e.target.value })}
+                />
+                <label className="admin-label" htmlFor="edit-price">Price (ETB)</label>
+                <input
+                  id="edit-price"
+                  type="number"
+                  min={0.01}
+                  step={0.01}
+                  className="admin-input"
+                  value={editForm.price}
+                  onChange={(e) => setEditForm({ ...editForm, price: e.target.value })}
+                />
+                <label className="admin-label" htmlFor="edit-status">Status</label>
+                <select
+                  id="edit-status"
+                  className="admin-select"
+                  value={editForm.status}
+                  onChange={(e) => setEditForm({ ...editForm, status: e.target.value as 'ACTIVE' | 'INACTIVE' })}
+                >
+                  <option value="ACTIVE">Active</option>
+                  <option value="INACTIVE">Inactive</option>
+                </select>
+                {actionError && <p className="admin-error">⚠ {actionError}</p>}
+                <div className="admin-modal-actions">
+                  <button
+                    className="admin-btn admin-btn-primary"
+                    onClick={handleSave}
+                    disabled={saving}
+                  >
+                    {saving ? 'Saving…' : 'Save Changes'}
+                  </button>
+                  <button
+                    className="admin-btn admin-btn-secondary"
+                    onClick={() => { setEditRow(null); setActionError(null); }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </section>
+  );
+}
+
 // ─── Main Admin Dashboard Shell ───────────────────────────────────────────────
 
 export function AdminDashboard() {
@@ -546,6 +808,7 @@ export function AdminDashboard() {
         {tab === 'users'    && <UsersPanel />}
         {tab === 'orders'   && <OrdersPanel />}
         {tab === 'complaints' && <ComplaintsPanel />}
+        {tab === 'products'   && <ProductsPanel />}
       </div>
     </div>
   );
