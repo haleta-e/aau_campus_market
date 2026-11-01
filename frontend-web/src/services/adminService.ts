@@ -1,10 +1,15 @@
 import { API_BASE_URL, ApiError } from '../config/api';
 import { loadAuthFromStorage } from '../context/AuthContext';
+import type {
+  AdminStats,
+  AdminUser,
+  AdminOrder,
+  AuditLogsResponse,
+  AdminComplaint,
+  UpdateUserStatusPayload,
+  ResolveComplaintPayload,
+} from '../types/admin';
 
-/**
- * Low-level authenticated API request helper.
- * Injects JWT Bearer token from localStorage and parses response payload.
- */
 export async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = loadAuthFromStorage()?.token;
   const headers: Record<string, string> = {
@@ -40,12 +45,6 @@ export async function apiRequest<T>(endpoint: string, options: RequestInit = {})
   return payload as T;
 }
 
-import type {
-  AdminStats,
-  AdminUser,
-  UpdateUserStatusPayload,
-} from '../types/admin';
-
 /** GET /api/v1/admin/stats */
 export async function getAdminStats(): Promise<AdminStats> {
   const res = await apiRequest<{ status: string; data: AdminStats }>('/admin/stats');
@@ -72,13 +71,6 @@ export async function updateUserStatus(
   );
   return res.data;
 }
-
-import type {
-  AdminOrder,
-  AuditLogsResponse,
-  AdminComplaint,
-  ResolveComplaintPayload,
-} from '../types/admin';
 
 /** GET /api/v1/admin/orders */
 export async function getAdminOrders(): Promise<AdminOrder[]> {
@@ -123,4 +115,33 @@ export async function resolveComplaint(
     { method: 'PATCH', body: JSON.stringify(payload) },
   );
   return res.data;
+}
+
+/**
+ * PATCH /api/v1/products/:id — Admin can update product fields
+ * Supported fields: name, description, category, price, stock_quantity, status
+ */
+export async function adminUpdateProduct(
+  productId: string,
+  updates: {
+    name?: string;
+    description?: string;
+    category?: string;
+    price?: number;
+    stock_quantity?: number;
+    status?: 'ACTIVE' | 'INACTIVE';
+  },
+): Promise<unknown> {
+  const res = await apiRequest<{ status: string; data: unknown }>(
+    `/products/${productId}`,
+    { method: 'PATCH', body: JSON.stringify(updates) },
+  );
+  return res.data;
+}
+
+/**
+ * DELETE /api/v1/products/:id — Admin can soft-deactivate a product
+ */
+export async function adminDeleteProduct(productId: string): Promise<void> {
+  await apiRequest<unknown>(`/products/${productId}`, { method: 'DELETE' });
 }
