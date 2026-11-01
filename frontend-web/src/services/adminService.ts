@@ -72,3 +72,55 @@ export async function updateUserStatus(
   );
   return res.data;
 }
+
+import type {
+  AdminOrder,
+  AuditLogsResponse,
+  AdminComplaint,
+  ResolveComplaintPayload,
+} from '../types/admin';
+
+/** GET /api/v1/admin/orders */
+export async function getAdminOrders(): Promise<AdminOrder[]> {
+  const res = await apiRequest<{ status: string; data: AdminOrder[] }>('/admin/orders');
+  return res.data;
+}
+
+/**
+ * GET /api/v1/admin/audit-logs
+ * Supports: page, limit, action, entity_type query params
+ */
+export async function getAuditLogs(
+  params: { page?: number; limit?: number; action?: string; entity_type?: string } = {},
+): Promise<AuditLogsResponse> {
+  const qs = new URLSearchParams();
+  if (params.page) qs.set('page', String(params.page));
+  if (params.limit) qs.set('limit', String(params.limit));
+  if (params.action) qs.set('action', params.action);
+  if (params.entity_type) qs.set('entity_type', params.entity_type);
+  const query = qs.toString() ? `?${qs.toString()}` : '';
+  const res = await apiRequest<AuditLogsResponse>(`/admin/audit-logs${query}`);
+  return res;
+}
+
+/** GET /api/v1/complaints/admin — all complaints across the system */
+export async function getAdminComplaints(): Promise<AdminComplaint[]> {
+  const res = await apiRequest<{ status: string; data: AdminComplaint[] }>('/complaints/admin');
+  return res.data;
+}
+
+/**
+ * PATCH /api/v1/complaints/:id/resolve
+ * status: 'UNDER_REVIEW' | 'RESOLVED' | 'REJECTED' | 'CLOSED'
+ * resolution: string (min 5 chars)
+ */
+export async function resolveComplaint(
+  complaintId: string,
+  payload: ResolveComplaintPayload,
+): Promise<AdminComplaint> {
+  const res = await apiRequest<{ status: string; data: AdminComplaint }>(
+    `/complaints/${complaintId}/resolve`,
+    { method: 'PATCH', body: JSON.stringify(payload) },
+  );
+  return res.data;
+}
