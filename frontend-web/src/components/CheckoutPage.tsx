@@ -59,6 +59,29 @@ export function CheckoutPage({ onBackToCart, onOrderPlaced }: CheckoutPageProps)
         })),
       };
 
+      if (token === 'demo-access-token') {
+        const demoOrder = {
+          id: `demo-ord-${Date.now()}`,
+          order_number: `ORD-2026-AAU-${Math.floor(1000 + Math.random() * 9000)}`,
+          buyer_id: user.id,
+          seller_id: primarySellerId,
+          status: 'PENDING' as const,
+          payment_status: paymentMethod === 'CASH' ? 'UNPAID' : 'PAID',
+          total_amount: grandTotal.toFixed(2),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+        clearCart();
+        onOrderPlaced({
+          order: demoOrder,
+          fulfillmentMethod,
+          deliveryFee,
+          pickupLocation: fulfillmentMethod === 'pickup' ? `${selectedCampus} Student Hub` : undefined,
+          deliveryAddress: fulfillmentMethod === 'delivery' ? `${selectedCampus} - ${deliveryLocation.trim()}` : undefined,
+        });
+        return;
+      }
+
       // 1. Submit order atomically to backend
       const createdOrder = await orderService.placeOrder(orderPayload, token);
 

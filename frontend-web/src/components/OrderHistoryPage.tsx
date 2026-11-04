@@ -31,6 +31,31 @@ function statusBadgeClass(status: string): string {
   return map[status] ?? 'badge badge-pending';
 }
 
+const DEMO_ORDERS: BackendOrder[] = [
+  {
+    id: 'demo-ord-1',
+    order_number: 'ORD-2026-4K-0891',
+    buyer_id: 'demo-buyer-1',
+    seller_id: 'demo-seller-1',
+    status: 'CONFIRMED',
+    payment_status: 'CASH',
+    total_amount: '630.00',
+    created_at: new Date(Date.now() - 3600000 * 2).toISOString(),
+    updated_at: new Date(Date.now() - 3600000).toISOString(),
+  },
+  {
+    id: 'demo-ord-2',
+    order_number: 'ORD-2026-5K-0744',
+    buyer_id: 'demo-buyer-1',
+    seller_id: 'demo-seller-2',
+    status: 'COMPLETED',
+    payment_status: 'SUCCESS',
+    total_amount: '275.00',
+    created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
+    updated_at: new Date(Date.now() - 86400000).toISOString(),
+  },
+];
+
 interface OrderHistoryPageProps {
   onViewDetail: (orderId: string) => void;
   onBack: () => void;
@@ -46,6 +71,12 @@ export function OrderHistoryPage({ onViewDetail, onBack }: OrderHistoryPageProps
   const loadOrders = useCallback(async () => {
     if (!token) {
       setError('You must be signed in to view your orders.');
+      setLoading(false);
+      return;
+    }
+
+    if (token === 'demo-access-token') {
+      setOrders(DEMO_ORDERS);
       setLoading(false);
       return;
     }

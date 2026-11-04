@@ -36,6 +36,7 @@ export interface AuthState {
 
 export interface AuthContextType extends AuthState {
   login: (credentials: LoginCredentials) => Promise<{ success: boolean; message?: string }>;
+  loginDemo: (role?: UserRole) => void;
   logout: () => Promise<void>;
   hasRole: (roles: UserRole | UserRole[]) => boolean;
 }

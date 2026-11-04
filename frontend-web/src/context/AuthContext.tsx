@@ -114,6 +114,27 @@ export function AuthProvider({ children, initialUser, initialToken }: AuthProvid
     }
   }, []);
 
+  const loginDemo = useCallback((role: UserRole = 'BUYER') => {
+    const demoUser: User = {
+      id: role === 'ADMIN' ? 'demo-admin-1' : 'demo-buyer-1',
+      username: role === 'ADMIN' ? 'sysadmin' : 'abebe_student',
+      email: role === 'ADMIN' ? 'admin@aau.edu.et' : 'abebe@aau.edu.et',
+      role,
+      status: 'ACTIVE',
+    };
+    setUser(demoUser);
+    setToken('demo-access-token');
+    setRefreshToken('demo-refresh-token');
+    localStorage.setItem(
+      AUTH_STORAGE_KEY,
+      JSON.stringify({
+        token: 'demo-access-token',
+        refreshToken: 'demo-refresh-token',
+        user: demoUser,
+      })
+    );
+  }, []);
+
   const logout = useCallback(async () => {
     if (token) {
       await authService.logout(token, refreshToken || undefined);
@@ -140,6 +161,7 @@ export function AuthProvider({ children, initialUser, initialToken }: AuthProvid
     isAuthenticated: Boolean(user && token),
     isLoading,
     login,
+    loginDemo,
     logout,
     hasRole,
   };

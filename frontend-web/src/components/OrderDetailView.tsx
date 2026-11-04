@@ -48,6 +48,22 @@ export function OrderDetailView({ orderId, onBack }: OrderDetailViewProps) {
       return;
     }
 
+    if (token === 'demo-access-token') {
+      setOrder({
+        id: orderId,
+        order_number: 'ORD-2026-4K-0891',
+        buyer_id: 'demo-buyer-1',
+        seller_id: 'demo-seller-1',
+        status: 'CONFIRMED',
+        payment_status: 'CASH',
+        total_amount: '630.00',
+        created_at: new Date(Date.now() - 3600000 * 2).toISOString(),
+        updated_at: new Date(Date.now() - 3600000).toISOString(),
+      });
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError(null);
 

@@ -8,7 +8,7 @@ interface LoginPageProps {
 }
 
 export function LoginPage({ onSuccess, onCancel, message }: LoginPageProps) {
-  const { login, isLoading } = useAuth();
+  const { login, loginDemo, isLoading } = useAuth();
 
   const [usernameOrEmail, setUsernameOrEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -164,6 +164,58 @@ export function LoginPage({ onSuccess, onCancel, message }: LoginPageProps) {
             </button>
           </div>
         </form>
+
+        <div
+          className="demo-login-cluster"
+          style={{
+            marginTop: '1.25rem',
+            paddingTop: '1rem',
+            borderTop: '1px solid var(--border)',
+            textAlign: 'center',
+          }}
+        >
+          <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginBottom: '0.625rem' }}>
+            🛠️ <strong>Explore Without Backend (Demo Sign-In)</strong>:
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+            <button
+              type="button"
+              className="nav-btn"
+              style={{
+                backgroundColor: 'var(--primary-light)',
+                color: 'var(--primary)',
+                border: '1px solid var(--primary)',
+                justifyContent: 'center',
+                padding: '0.5rem',
+                fontSize: '0.8125rem',
+              }}
+              onClick={() => {
+                loginDemo('BUYER');
+                onSuccess();
+              }}
+            >
+              🎓 Student Demo
+            </button>
+            <button
+              type="button"
+              className="nav-btn"
+              style={{
+                backgroundColor: 'var(--accent-light)',
+                color: 'var(--accent-hover)',
+                border: '1px solid var(--accent)',
+                justifyContent: 'center',
+                padding: '0.5rem',
+                fontSize: '0.8125rem',
+              }}
+              onClick={() => {
+                loginDemo('ADMIN');
+                onSuccess();
+              }}
+            >
+              🛡 Admin Demo
+            </button>
+          </div>
+        </div>
 
         <div className="login-footer-info">
           <small>
