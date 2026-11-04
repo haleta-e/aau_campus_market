@@ -142,6 +142,31 @@ npm run typecheck
 npm run build
 ```
 
+### 3. Web Deployment (Vercel)
+
+The web frontend includes SPA routing configuration in `frontend-web/vercel.json` and is ready for one-click deployment on [Vercel](https://vercel.com):
+
+#### Option A: Deploy via Vercel Dashboard (Recommended)
+1. Push your repository to GitHub.
+2. Sign in to [Vercel](https://vercel.com) and click **"Add New Project"**.
+3. Import your `aau_campus_market` repository.
+4. In the Project Configuration settings:
+   - **Root Directory**: Select `frontend-web`.
+   - **Framework Preset**: `Vite` (automatically detected).
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+5. In **Environment Variables**, add:
+   - `VITE_API_BASE_URL`: The public URL of your deployed backend API (e.g. `https://your-api.onrender.com/api/v1` or `https://your-backend.up.railway.app/api/v1`).
+6. Click **Deploy**. Vercel will build and assign a global HTTPS URL (e.g., `https://aau-campus-market.vercel.app`).
+
+#### Option B: Deploy via Vercel CLI
+```bash
+cd frontend-web
+npx vercel
+# Follow the interactive prompts to deploy preview or production (--prod)
+```
+
+
 ---
 
 ## Known Boundaries & Documented Limitations (MVP)
