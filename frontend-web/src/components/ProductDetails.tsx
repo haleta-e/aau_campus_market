@@ -47,16 +47,18 @@ export function ProductDetails({
         }
       } catch (err) {
         if (isMounted) {
-          if (err instanceof ApiError) {
-            setError(err);
-          } else {
-            setError(
-              new ApiError(
-                'Unable to load product details. Please check your backend connection.',
-                0,
-                'NETWORK_ERROR'
-              )
-            );
+          if (!initialProduct) {
+            if (err instanceof ApiError) {
+              setError(err);
+            } else {
+              setError(
+                new ApiError(
+                  'Unable to load product details. Please check your backend connection.',
+                  0,
+                  'NETWORK_ERROR'
+                )
+              );
+            }
           }
         }
       } finally {

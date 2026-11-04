@@ -189,6 +189,17 @@ export function AppContent() {
 
   // Fetch products from backend
   const loadProducts = useCallback(async () => {
+    const isDemoMode =
+      typeof window !== 'undefined' &&
+      (window.location.search.includes('demo=true') || window.location.hash.includes('demo'));
+
+    if (isDemoMode) {
+      setProducts(DEMO_PRODUCTS);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
