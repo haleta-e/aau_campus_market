@@ -39,6 +39,121 @@ const AAU_CAMPUSES = [
   'Ledeta Campus',
 ];
 
+const DEMO_PRODUCTS: Product[] = [
+  {
+    id: 'demo-1',
+    seller_id: 'demo-seller-1',
+    name: 'USB 3.0 Flash Drive 64GB High Speed',
+    description: 'Ultra-fast data transfer for course assignments, lab software, and lecture slides.',
+    category: 'Electronics',
+    price: '450.00',
+    stock_quantity: 18,
+    status: 'ACTIVE',
+    created_at: '2026-10-30T10:00:00.000Z',
+    updated_at: '2026-10-30T10:00:00.000Z',
+    store_name: '4 Kilo Tech Hub',
+    campus_location: '4 Kilo Campus',
+  },
+  {
+    id: 'demo-2',
+    seller_id: 'demo-seller-2',
+    name: 'A4 Grid Hardcover Notebook 200 Pages',
+    description: 'High-quality ruled paper perfect for engineering, mathematics, and natural science lectures.',
+    category: 'Stationery',
+    price: '180.00',
+    stock_quantity: 45,
+    status: 'ACTIVE',
+    created_at: '2026-10-30T10:00:00.000Z',
+    updated_at: '2026-10-30T10:00:00.000Z',
+    store_name: '5 Kilo Bookshop',
+    campus_location: '5 Kilo Campus',
+  },
+  {
+    id: 'demo-3',
+    seller_id: 'demo-seller-1',
+    name: 'Scientific Calculator fx-991EX ClassWiz',
+    description: 'AAU Exam Board approved advanced scientific calculator with 552 functions.',
+    category: 'Electronics',
+    price: '1450.00',
+    stock_quantity: 6,
+    status: 'ACTIVE',
+    created_at: '2026-10-30T10:00:00.000Z',
+    updated_at: '2026-10-30T10:00:00.000Z',
+    store_name: '4 Kilo Tech Hub',
+    campus_location: '4 Kilo Campus',
+  },
+  {
+    id: 'demo-4',
+    seller_id: 'demo-seller-3',
+    name: 'AAU Department Hoodie (Navy Blue, Size L)',
+    description: 'Warm collegiate fleece hoodie with Addis Ababa University embroidered crest.',
+    category: 'Clothing',
+    price: '950.00',
+    stock_quantity: 12,
+    status: 'ACTIVE',
+    created_at: '2026-10-30T10:00:00.000Z',
+    updated_at: '2026-10-30T10:00:00.000Z',
+    store_name: '6 Kilo Apparel',
+    campus_location: '6 Kilo Campus',
+  },
+  {
+    id: 'demo-5',
+    seller_id: 'demo-seller-4',
+    name: 'Organic Roasted Ethiopian Coffee Beans (500g)',
+    description: 'Freshly roasted Sidama single-origin whole bean coffee for late-night study sessions.',
+    category: 'Food',
+    price: '380.00',
+    stock_quantity: 25,
+    status: 'ACTIVE',
+    created_at: '2026-10-30T10:00:00.000Z',
+    updated_at: '2026-10-30T10:00:00.000Z',
+    store_name: 'Sefer Selam Roasters',
+    campus_location: 'Sefer Selam Campus',
+  },
+  {
+    id: 'demo-6',
+    seller_id: 'demo-seller-5',
+    name: 'Antibacterial Hand Sanitizer & Laundry Soap Set',
+    description: 'Dormitory care pack with 500ml pump sanitizer and lavender laundry detergent bar.',
+    category: 'Sanitary',
+    price: '140.00',
+    stock_quantity: 30,
+    status: 'ACTIVE',
+    created_at: '2026-10-30T10:00:00.000Z',
+    updated_at: '2026-10-30T10:00:00.000Z',
+    store_name: 'Ledeta Health Corner',
+    campus_location: 'Ledeta Campus',
+  },
+  {
+    id: 'demo-7',
+    seller_id: 'demo-seller-2',
+    name: 'Ballpoint Pens Box (Pack of 12, Blue & Black)',
+    description: 'Smooth writing 0.7mm tip pens for exams and note taking.',
+    category: 'Stationery',
+    price: '95.00',
+    stock_quantity: 40,
+    status: 'ACTIVE',
+    created_at: '2026-10-30T10:00:00.000Z',
+    updated_at: '2026-10-30T10:00:00.000Z',
+    store_name: '5 Kilo Bookshop',
+    campus_location: '5 Kilo Campus',
+  },
+  {
+    id: 'demo-8',
+    seller_id: 'demo-seller-6',
+    name: 'Wireless Bluetooth Ergonomic Mouse',
+    description: 'Rechargeable silent-click wireless mouse with USB receiver for laptops and tablets.',
+    category: 'Electronics',
+    price: '620.00',
+    stock_quantity: 9,
+    status: 'ACTIVE',
+    created_at: '2026-10-30T10:00:00.000Z',
+    updated_at: '2026-10-30T10:00:00.000Z',
+    store_name: 'Mexico Campus Digital',
+    campus_location: 'Mexico Campus',
+  },
+];
+
 export function AppContent() {
   const { isAuthenticated, user } = useAuth();
 
@@ -290,6 +405,10 @@ export function AppContent() {
                 statusCode={error.statusCode}
                 code={error.code}
                 onRetry={loadProducts}
+                onLoadDemo={() => {
+                  setProducts(DEMO_PRODUCTS);
+                  setError(null);
+                }}
               />
             ) : products.length === 0 ? (
               <EmptyState isFiltered={isFiltered} onClearFilters={handleResetFilters} />

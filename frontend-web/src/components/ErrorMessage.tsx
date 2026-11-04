@@ -3,9 +3,10 @@ interface ErrorMessageProps {
   statusCode?: number;
   code?: string;
   onRetry: () => void;
+  onLoadDemo?: () => void;
 }
 
-export function ErrorMessage({ message, statusCode, code, onRetry }: ErrorMessageProps) {
+export function ErrorMessage({ message, statusCode, code, onRetry, onLoadDemo }: ErrorMessageProps) {
   return (
     <div className="error-card" role="alert" aria-live="assertive">
       <div className="error-icon" aria-hidden="true">
@@ -26,9 +27,25 @@ export function ErrorMessage({ message, statusCode, code, onRetry }: ErrorMessag
           </small>
         </div>
       </div>
-      <button type="button" className="retry-btn" onClick={onRetry}>
-        🔄 Retry Connection
-      </button>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <button type="button" className="retry-btn" onClick={onRetry}>
+          🔄 Retry Connection
+        </button>
+        {onLoadDemo && (
+          <button
+            type="button"
+            className="retry-btn"
+            style={{
+              background: 'var(--accent-gradient)',
+              borderColor: 'var(--accent)',
+              color: '#ffffff',
+            }}
+            onClick={onLoadDemo}
+          >
+            ✨ Explore Demo Showcase
+          </button>
+        )}
+      </div>
     </div>
   );
 }
