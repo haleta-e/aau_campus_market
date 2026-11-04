@@ -1,4 +1,5 @@
 import { useCart } from '../context/CartContext';
+import { getCategoryEmoji } from '../utils/emojiMap';
 
 interface CartPageProps {
   onContinueShopping: () => void;
@@ -76,10 +77,7 @@ export function CartPage({ onContinueShopping, onProceedToCheckout }: CartPagePr
               >
                 <div className="cart-item-media">
                   <span className="cart-placeholder-icon" aria-hidden="true">
-                    {product.category.toLowerCase().includes('elec') ? '🔌' :
-                     product.category.toLowerCase().includes('stat') ? '📚' :
-                     product.category.toLowerCase().includes('cloth') ? '👕' :
-                     product.category.toLowerCase().includes('food') ? '🍔' : '📦'}
+                    {getCategoryEmoji(product.category)}
                   </span>
                 </div>
 
