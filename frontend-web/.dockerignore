@@ -1,0 +1,23 @@
+# Node dependencies (reinstalled inside the container by npm ci)
+node_modules
+
+# Local Vite build output (the builder stage regenerates this)
+dist
+
+# Local environment files (secrets must never go into the image)
+.env
+.env.local
+.env.*.local
+
+# Test & dev-only files
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# Docs and misc
+*.md
+*.log
+.git
+.gitignore
+.DS_Store
