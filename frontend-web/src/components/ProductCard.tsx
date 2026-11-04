@@ -1,4 +1,5 @@
 import { Product } from '../types/product';
+import { getCategoryEmoji, getCampusEmoji } from '../utils/emojiMap';
 
 interface ProductCardProps {
   product: Product;
@@ -37,10 +38,7 @@ export function ProductCard({ product, onSelectProduct }: ProductCardProps) {
     >
       <div className="product-card-media">
         <div className="product-placeholder-icon" aria-hidden="true">
-          {product.category.toLowerCase().includes('elec') ? '🔌' :
-           product.category.toLowerCase().includes('stat') ? '📚' :
-           product.category.toLowerCase().includes('cloth') ? '👕' :
-           product.category.toLowerCase().includes('food') ? '🍔' : '📦'}
+          {getCategoryEmoji(product.category)}
         </div>
         <span className="product-category-tag">{product.category}</span>
       </div>
@@ -64,7 +62,7 @@ export function ProductCard({ product, onSelectProduct }: ProductCardProps) {
           )}
           {product.campus_location && (
             <span className="product-campus" title={`Campus: ${product.campus_location}`}>
-              📍 {product.campus_location}
+              {getCampusEmoji(product.campus_location)} {product.campus_location}
             </span>
           )}
         </div>

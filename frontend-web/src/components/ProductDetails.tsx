@@ -3,6 +3,7 @@ import { Product } from '../types/product';
 import { productService } from '../services/productService';
 import { useCart } from '../context/CartContext';
 import { ApiError } from '../config/api';
+import { getCategoryEmoji } from '../utils/emojiMap';
 
 interface ProductDetailsProps {
   productId: string;
@@ -246,10 +247,7 @@ export function ProductDetails({
       <div className="details-layout">
         <div className="details-media-panel">
           <div className="details-placeholder-icon" aria-hidden="true">
-            {product.category.toLowerCase().includes('elec') ? '🔌' :
-             product.category.toLowerCase().includes('stat') ? '📚' :
-             product.category.toLowerCase().includes('cloth') ? '👕' :
-             product.category.toLowerCase().includes('food') ? '🍔' : '📦'}
+            {getCategoryEmoji(product.category)}
           </div>
           <span className="details-category-badge">{product.category}</span>
         </div>
