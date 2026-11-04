@@ -1,0 +1,27 @@
+# ============================================================
+#  Render.com Blueprint — AAU Campus Market Web Frontend
+#
+#  This file tells Render how to build and deploy the app.
+#  Commit this to your repo; Render will auto-detect it.
+#  Docs: https://render.com/docs/blueprint-spec
+# ============================================================
+
+services:
+  - type: web
+    name: aau-campus-market-web
+    runtime: docker
+    # Path to the Dockerfile, relative to the repo root
+    dockerfilePath: ./frontend-web/Dockerfile
+    # Docker build context (the directory Dockerfile can read from)
+    dockerContext: ./frontend-web
+    plan: free
+
+    # Environment variables injected at build time (Vite reads VITE_* vars)
+    envVars:
+      - key: VITE_API_BASE_URL
+        # Replace this value with your deployed backend URL after you deploy
+        # the backend (e.g., Railway, Render, Fly.io, etc.)
+        value: https://your-backend-api.onrender.com/api/v1
+
+    # Health check — Render will poll /health to confirm the container is up
+    healthCheckPath: /health

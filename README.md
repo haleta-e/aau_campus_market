@@ -142,7 +142,43 @@ npm run typecheck
 npm run build
 ```
 
-### 3. Web Deployment (Vercel)
+### 3. Production Web Deployment (Docker + Nginx on Render.com)
+
+The web frontend includes a multi-stage Docker build (`frontend-web/Dockerfile`), production Nginx reverse proxy configuration (`frontend-web/nginx.conf`), and Infrastructure as Code Blueprint (`render.yaml`).
+
+#### Step-by-Step Render Deployment Workflow:
+1. **Push your repository to GitHub**:
+   ```bash
+   git push origin main
+   ```
+2. **Sign up or log in to [Render.com](https://render.com)**.
+3. **Deploy using Blueprints (Recommended)**:
+   - In the Render Dashboard, click **New +** and select **Blueprint**.
+   - Connect your `aau_campus_market` GitHub repository.
+   - Render automatically detects `render.yaml` and configures the `aau-campus-market-web` service.
+   - Set the `VITE_API_BASE_URL` environment variable to your production backend URL.
+   - Click **Apply**. Render will trigger the multi-stage Docker build and deploy the container.
+4. **Deploy manually via Web Service (Alternative)**:
+   - Click **New +** -> **Web Service**.
+   - Choose your repository and select **Docker** as the environment.
+   - Set **Dockerfile Path**: `./frontend-web/Dockerfile`.
+   - Set **Docker Context**: `./frontend-web`.
+   - Under **Environment Variables**, add `VITE_API_BASE_URL` with your backend API URL.
+   - Click **Create Web Service**.
+
+#### Testing the Production Container Locally with Docker:
+```bash
+# Build the production Docker image with build argument
+docker build -t aau-campus-market-web:local --build-arg VITE_API_BASE_URL=http://localhost:4000/api/v1 frontend-web
+
+# Run the container locally mapped to port 8080
+docker run -d -p 8080:80 --name aau-web-container aau-campus-market-web:local
+
+# Open http://localhost:8080 or test the health check endpoint:
+# curl http://localhost:8080/health
+```
+
+### 4. Alternative Web Deployment (Vercel)
 
 The web frontend includes SPA routing configuration in `frontend-web/vercel.json` and is ready for one-click deployment on [Vercel](https://vercel.com):
 
