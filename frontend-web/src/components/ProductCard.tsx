@@ -1,5 +1,6 @@
 import { Product } from '../types/product';
-import { getCategoryEmoji, getCampusEmoji } from '../utils/emojiMap';
+import { getCampusEmoji } from '../utils/emojiMap';
+import { getProductImageUrl } from '../utils/productImages';
 
 interface ProductCardProps {
   product: Product;
@@ -37,9 +38,13 @@ export function ProductCard({ product, onSelectProduct }: ProductCardProps) {
       aria-label={`View details for ${product.name}`}
     >
       <div className="product-card-media">
-        <div className="product-placeholder-icon" aria-hidden="true">
-          {getCategoryEmoji(product.category)}
-        </div>
+        <img
+          src={getProductImageUrl(product)}
+          alt={product.name}
+          className="product-card-image"
+          loading="lazy"
+        />
+        <div className="product-media-overlay" aria-hidden="true" />
         <span className="product-category-tag">{product.category}</span>
       </div>
 

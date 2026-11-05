@@ -3,7 +3,7 @@ import { Product } from '../types/product';
 import { productService } from '../services/productService';
 import { useCart } from '../context/CartContext';
 import { ApiError } from '../config/api';
-import { getCategoryEmoji } from '../utils/emojiMap';
+import { getProductImageUrl } from '../utils/productImages';
 
 interface ProductDetailsProps {
   productId: string;
@@ -248,9 +248,12 @@ export function ProductDetails({
 
       <div className="details-layout">
         <div className="details-media-panel">
-          <div className="details-placeholder-icon" aria-hidden="true">
-            {getCategoryEmoji(product.category)}
-          </div>
+          <img
+            src={getProductImageUrl(product)}
+            alt={product.name}
+            className="details-product-image"
+          />
+          <div className="details-media-overlay" aria-hidden="true" />
           <span className="details-category-badge">{product.category}</span>
         </div>
 
