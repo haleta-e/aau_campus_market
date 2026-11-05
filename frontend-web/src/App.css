@@ -9,9 +9,9 @@
 .site-header {
   background: var(--primary-gradient);
   color: #ffffff;
-  padding: 1.25rem 1.5rem;
-  box-shadow: 0 4px 20px rgba(9, 44, 78, 0.25);
-  border-bottom: 3px solid var(--accent);
+  padding: 1.1rem 1.5rem;
+  box-shadow: 0 4px 24px rgba(150, 40, 27, 0.30);
+  border-bottom: 4px solid var(--accent);
   position: relative;
   z-index: 50;
 }
@@ -47,7 +47,7 @@
   padding: 0.5rem 0.75rem;
   border-radius: var(--radius);
   letter-spacing: 0.05em;
-  box-shadow: 0 4px 10px rgba(217, 119, 6, 0.35);
+  box-shadow: 0 4px 12px rgba(243, 156, 18, 0.4);
   transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -64,7 +64,7 @@
 
 .brand-subtitle {
   font-size: 0.875rem;
-  color: #cbd5e1;
+  color: #fceceb;
   margin-top: 0.125rem;
 }
 
@@ -131,7 +131,7 @@
   background: var(--accent-gradient);
   border-color: var(--accent);
   color: #ffffff;
-  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.35);
+  box-shadow: 0 4px 14px rgba(243, 156, 18, 0.45);
 }
 
 .cart-counter-badge {
@@ -205,7 +205,7 @@
 
 .search-input:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(15, 61, 108, 0.15);
+  box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.15);
 }
 
 .search-clear-btn {
@@ -265,7 +265,7 @@
 
 .filter-select:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(15, 61, 108, 0.15);
+  box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.15);
 }
 
 .checkbox-group {
@@ -349,11 +349,11 @@
 .product-card:hover {
   transform: translateY(-5px);
   box-shadow: var(--shadow-hover);
-  border-color: rgba(15, 61, 108, 0.25);
+  border-color: rgba(192, 57, 43, 0.3);
 }
 
 .product-card-media {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background: linear-gradient(135deg, #fffdfa 0%, #faeee4 100%);
   height: 170px;
   position: relative;
   display: flex;
@@ -376,7 +376,7 @@
   position: absolute;
   top: 0.75rem;
   left: 0.75rem;
-  background-color: rgba(15, 61, 108, 0.92);
+  background: linear-gradient(135deg, #c0392b 0%, #96281b 100%);
   backdrop-filter: blur(4px);
   color: #ffffff;
   font-size: 0.6875rem;
@@ -385,7 +385,7 @@
   border-radius: var(--radius-sm);
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 6px rgba(150, 40, 27, 0.35);
 }
 
 .product-card-body {
@@ -498,7 +498,7 @@
   width: 100%;
   background-color: var(--primary-light);
   color: var(--primary);
-  border: 1px solid rgba(15, 61, 108, 0.3);
+  border: 1px solid rgba(192, 57, 43, 0.3);
   padding: 0.5rem 0.875rem;
   border-radius: var(--radius);
   font-size: 0.8125rem;
@@ -510,7 +510,7 @@
   background: var(--primary-gradient);
   color: #ffffff;
   border-color: transparent;
-  box-shadow: 0 4px 12px rgba(15, 61, 108, 0.25);
+  box-shadow: 0 4px 12px rgba(192, 57, 43, 0.28);
   transform: translateY(-1px);
 }
 
@@ -616,7 +616,7 @@
 }
 
 .details-media-panel {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background: linear-gradient(135deg, #fffdfa 0%, #faeee4 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1046,11 +1046,11 @@
 }
 
 .summary-note {
-  background-color: #eff6ff;
-  border: 1px solid #bfdbfe;
+  background-color: #fef9e7;
+  border: 1px solid #fde68a;
   border-radius: 6px;
   padding: 0.75rem;
-  color: #1e40af;
+  color: #92400e;
   font-size: 0.8125rem;
   line-height: 1.4;
 }
@@ -1318,13 +1318,13 @@
 
 /* Footer */
 .site-footer {
-  background-color: #0b1a2e;
-  color: #94a3b8;
+  background-color: #24140e;
+  color: #cbb8ad;
   font-size: 0.8125rem;
   text-align: center;
   padding: 1.5rem;
   margin-top: auto;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(232, 213, 196, 0.15);
 }
 
 /* Responsive adjustments */
@@ -2705,10 +2705,10 @@
 
 /* ── Admin nav button in Header ─────────────────────────────────────────── */
 .btn-admin-nav {
-  background: linear-gradient(135deg, var(--primary) 0%, #1e3a6f 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, #78281f 100%);
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .btn-admin-nav:hover {
-  background: linear-gradient(135deg, #1e3a6f 0%, var(--primary) 100%);
+  background: linear-gradient(135deg, #78281f 0%, var(--primary) 100%);
 }
