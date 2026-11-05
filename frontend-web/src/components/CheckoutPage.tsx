@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { orderService } from '../services/orderService';
-import { FulfillmentMethod, PaymentMethod, PlacedOrderConfirmation } from '../types/order';
+import { BackendOrder, FulfillmentMethod, PaymentMethod, PlacedOrderConfirmation } from '../types/order';
 
 interface CheckoutPageProps {
   onBackToCart: () => void;
@@ -60,13 +60,13 @@ export function CheckoutPage({ onBackToCart, onOrderPlaced }: CheckoutPageProps)
       };
 
       if (token === 'demo-access-token') {
-        const demoOrder = {
+        const demoOrder: BackendOrder = {
           id: `demo-ord-${Date.now()}`,
           order_number: `ORD-2026-AAU-${Math.floor(1000 + Math.random() * 9000)}`,
           buyer_id: user.id,
           seller_id: primarySellerId,
-          status: 'PENDING' as const,
-          payment_status: paymentMethod === 'CASH' ? 'UNPAID' : 'PAID',
+          status: 'PENDING',
+          payment_status: paymentMethod === 'CASH' ? 'PENDING' : 'SUCCESS',
           total_amount: grandTotal.toFixed(2),
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
