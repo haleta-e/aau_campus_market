@@ -1,39 +1,56 @@
 :root {
-  /* ── Warm Marketplace Palette ── */
-  --primary: #c0392b;
-  --primary-hover: #a93226;
-  --primary-light: #fdf0ef;
-  --primary-gradient: linear-gradient(135deg, #96281b 0%, #c0392b 60%, #e74c3c 100%);
-  --accent: #f39c12;
-  --accent-hover: #d68910;
-  --accent-gradient: linear-gradient(135deg, #f9ca24 0%, #f39c12 100%);
-  --accent-light: #fef9e7;
-  --bg: #fffef9;
-  --bg-warm: #faf8f4;
-  --surface: #ffffff;
-  --surface-warm: #fff8f0;
-  --surface-hover: #fff4e9;
-  --text-main: #2c1810;
-  --text-muted: #7d5a50;
-  --border: #e8d5c4;
-  --border-focus: #c0392b;
-  --badge-bg: #fdf0ef;
-  --success: #1e8449;
-  --success-bg: #d5f5e3;
-  --danger: #c0392b;
-  --danger-bg: #fdf0ef;
-  --warning: #d68910;
-  --warning-bg: #fef9e7;
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --shadow-sm: 0 1px 4px 0 rgba(44, 24, 16, 0.07), 0 1px 2px 0 rgba(44, 24, 16, 0.04);
-  --shadow-md: 0 4px 12px -1px rgba(192, 57, 43, 0.10), 0 2px 6px -2px rgba(44, 24, 16, 0.06);
-  --shadow-lg: 0 12px 28px -4px rgba(192, 57, 43, 0.14), 0 6px 14px -3px rgba(44, 24, 16, 0.07);
-  --shadow-hover: 0 18px 36px -4px rgba(192, 57, 43, 0.20), 0 8px 18px -4px rgba(192, 57, 43, 0.10);
-  --shadow-warm: 0 4px 16px rgba(243, 156, 18, 0.22);
-  --radius-sm: 6px;
+  /* ── Purple + White + Soft Pink Palette ── */
+  --primary: #7c3aed;            /* Vibrant Purple */
+  --primary-hover: #6d28d9;      /* Deep Purple */
+  --primary-light: #f5f3ff;      /* Very soft purple tint */
+  --primary-gradient: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #ec4899 100%);
+  
+  --secondary: #f472b6;          /* Soft Pink */
+  --secondary-hover: #ec4899;    /* Medium Pink */
+  --secondary-light: #fdf2f8;    /* Ultra soft pink background */
+  
+  --accent: #f43f5e;             /* Rose accent for badges/deals */
+  --accent-hover: #e11d48;
+  --accent-gradient: linear-gradient(135deg, #ec4899 0%, #f43f5e 100%);
+  --accent-light: #fff1f2;
+  
+  --bg: #F8FAFC;                 /* Requested: Very light gray #F8FAFC */
+  --bg-warm: #f1f5f9;
+  --surface: #ffffff;            /* Pure clean white */
+  --surface-warm: #faf5ff;       /* Light purple surface */
+  --surface-hover: #f3e8ff;
+  
+  --text-main: #0f172a;          /* Slate 900 for high-contrast crisp readability */
+  --text-muted: #64748b;         /* Slate 500 */
+  --border: #e2e8f0;             /* Clean subtle border */
+  --border-focus: #7c3aed;
+  
+  --badge-bg: #f5f3ff;
+  --success: #10b981;
+  --success-bg: #d1fae5;
+  --danger: #ef4444;
+  --danger-bg: #fee2e2;
+  --warning: #f59e0b;
+  --warning-bg: #fef3c7;
+  
+  /* Fonts: Poppins / Inter */
+  --font-sans: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  /* Subtle clean shadows */
+  --shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px 0 rgba(15, 23, 42, 0.02);
+  --shadow-md: 0 4px 14px -1px rgba(124, 58, 237, 0.07), 0 2px 6px -2px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 10px 25px -3px rgba(124, 58, 237, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.05);
+  --shadow-hover: 0 18px 35px -4px rgba(124, 58, 237, 0.18), 0 8px 16px -4px rgba(244, 114, 182, 0.15);
+  --shadow-glow: 0 0 20px rgba(124, 58, 237, 0.25);
+  
+  /* Border Radius: 10-14px as recommended */
+  --radius-sm: 8px;
   --radius: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-full: 9999px;
+  
+  /* Smooth transitions */
   --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-bounce: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -69,21 +86,21 @@ input, select, textarea {
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-/* Custom warm scrollbar */
+/* Elegant scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #faf3ec;
+  background: #f1f5f9;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #e8c4a0;
+  background: #cbd5e1;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #d4a070;
+  background: #a855f7;
 }
