@@ -20,6 +20,10 @@ import { OrderHistoryPage } from './components/OrderHistoryPage';
 import { OrderDetailView } from './components/OrderDetailView';
 import { AdminDashboard } from './components/AdminDashboard';
 import { PlacedOrderConfirmation } from './types/order';
+import { HeroSection } from './components/HeroSection';
+import { CategoryShowcase } from './components/CategoryShowcase';
+import { SpecialOffersSection } from './components/SpecialOffersSection';
+import { Footer } from './components/Footer';
 import './App.css';
 
 const INITIAL_FILTERS: FilterState = {
@@ -115,7 +119,7 @@ const DEMO_PRODUCTS: Product[] = [
     seller_id: 'demo-seller-5',
     name: 'Antibacterial Hand Sanitizer & Laundry Soap Set',
     description: 'Dormitory care pack with 500ml pump sanitizer and lavender laundry detergent bar.',
-    category: 'Sanitary',
+    category: 'Beauty',
     price: '140.00',
     stock_quantity: 30,
     status: 'ACTIVE',
@@ -174,6 +178,36 @@ export function AppContent() {
   const [page, setPage] = useState<number>(1);
   const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
 
+  // Favorites state
+  const [favorites, setFavorites] = useState<Set<string>>(() => {
+    try {
+      const stored = localStorage.getItem('aau_market_favorites');
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [activeOffersTab, setActiveOffersTab] = useState<'deals' | 'discounts' | 'new-arrivals' | 'best-sellers'>('deals');
+
+  const handleToggleFavorite = (productId: string) => {
+    setFavorites((prev) => {
+      const updated = new Set(prev);
+      if (updated.has(productId)) {
+        updated.delete(productId);
+      } else {
+        updated.add(productId);
+      }
+      try {
+        localStorage.setItem('aau_market_favorites', JSON.stringify(Array.from(updated)));
+      } catch {
+        // Ignore localStorage error
+      }
+      return updated;
+    });
+  };
+
   // Debounced search term for API queries
   const [debouncedSearch, setDebouncedSearch] = useState<string>('');
 
@@ -230,15 +264,20 @@ export function AppContent() {
 
   // Extract unique categories available from products or default set
   const categories = useMemo(() => {
-    const defaultCategories = ['Electronics', 'Stationery', 'Books', 'Clothing', 'Accessories', 'Food'];
+    const defaultCategories = ['Electronics', 'Stationery', 'Books', 'Clothing', 'Accessories', 'Food', 'Beauty', 'Home essentials'];
     const dynamicCategories = Array.from(new Set(products.map((p) => p.category).filter(Boolean)));
     return Array.from(new Set([...dynamicCategories, ...defaultCategories]));
   }, [products]);
 
-  // Filter and sort products client-side for campus, stock, and sorting
+  // Filter and sort products client-side for campus, stock, favorites, and sorting
   const filteredProducts = useMemo(() => {
     return products
       .filter((product) => {
+        // Favorites filter
+        if (showFavoritesOnly && !favorites.has(product.id)) {
+          return false;
+        }
+
         // Campus filter
         if (filters.campus) {
           const productCampus = product.campus_location?.toLowerCase() || '';
@@ -267,15 +306,16 @@ export function AppContent() {
         }
         return 0; // default order from API
       });
-  }, [products, filters.campus, filters.inStockOnly, filters.sortBy]);
+  }, [products, filters.campus, filters.inStockOnly, filters.sortBy, showFavoritesOnly, favorites]);
 
   const handleFilterChange = <K extends keyof FilterState>(key: K, value: FilterState[K]) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
-    setPage(1); // Reset to first page on filter change
+    setPage(1);
   };
 
   const handleResetFilters = () => {
     setFilters(INITIAL_FILTERS);
+    setShowFavoritesOnly(false);
     setPage(1);
   };
 
@@ -292,30 +332,30 @@ export function AppContent() {
   };
 
   const handleNavigate = (view: AppView) => {
-    // Route guard: protected views require authentication
-    if ((view === 'checkout' || view === 'orders' || view === 'order-detail') && !isAuthenticated) {
-      setRedirectAfterLogin(view === 'order-detail' ? 'orders' : view);
-      setLoginMessage(
-        view === 'checkout'
-          ? 'Please sign in to proceed with your order checkout.'
-          : 'Please sign in to view your orders.'
-      );
+    if (view === 'orders' && !isAuthenticated) {
+      setRedirectAfterLogin('orders');
+      setLoginMessage('Please sign in to view your orders.');
       setCurrentView('login');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
-    // Admin route guard: only ADMIN role may access admin dashboard
+    if (view === 'checkout' && !isAuthenticated) {
+      setRedirectAfterLogin('checkout');
+      setLoginMessage('Please sign in to proceed with checkout.');
+      setCurrentView('login');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     if (view === 'admin' && (!isAuthenticated || user?.role !== 'ADMIN')) {
-      setRedirectAfterLogin(null);
-      setLoginMessage('Administrator access is required to view that page.');
-      setCurrentView('login');
+      setCurrentView('catalogue');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
-    setLoginMessage(undefined);
     setCurrentView(view);
+    setShowFavoritesOnly(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -331,11 +371,24 @@ export function AppContent() {
     filters.search !== '' ||
     filters.category !== '' ||
     filters.campus !== '' ||
-    filters.inStockOnly;
+    filters.inStockOnly ||
+    showFavoritesOnly;
 
   return (
     <div className="app-container">
-      <Header currentView={currentView} onNavigate={handleNavigate} />
+      <Header
+        currentView={currentView}
+        onNavigate={handleNavigate}
+        searchTerm={filters.search}
+        onSearchChange={(search) => handleFilterChange('search', search)}
+        onCategorySelect={(category) => handleFilterChange('category', category)}
+        favoritesCount={favorites.size}
+        onOpenFavorites={() => {
+          setShowFavoritesOnly(true);
+          setCurrentView('catalogue');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
 
       <main className="main-content">
         {currentView === 'login' ? (
@@ -399,6 +452,72 @@ export function AppContent() {
           />
         ) : (
           <>
+            {/* B. Hero Section (shown when on main catalogue without active search) */}
+            {!filters.search && !showFavoritesOnly && (
+              <HeroSection
+                onExploreClick={() => {
+                  const filterElem = document.querySelector('.filter-bar-container');
+                  filterElem?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                onSpecialOffersClick={() => {
+                  const offersElem = document.querySelector('.special-offers-section');
+                  offersElem?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              />
+            )}
+
+            {/* C. Categories Department Showcase */}
+            {!showFavoritesOnly && (
+              <CategoryShowcase
+                selectedCategory={filters.category}
+                onSelectCategory={(category) => {
+                  handleFilterChange('category', category);
+                  const gridElem = document.querySelector('.product-catalogue-heading-row');
+                  gridElem?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              />
+            )}
+
+            {/* E. Special Offers Section (Deals, Discounts, New Arrivals, Best Sellers) */}
+            {!filters.search && !showFavoritesOnly && (products.length > 0 || DEMO_PRODUCTS.length > 0) && (
+              <SpecialOffersSection
+                products={products.length > 0 ? products : DEMO_PRODUCTS}
+                activeTab={activeOffersTab}
+                onTabChange={setActiveOffersTab}
+                onSelectProduct={handleSelectProduct}
+                onViewAllOffers={() => {
+                  handleFilterChange('inStockOnly', true);
+                }}
+                favorites={favorites}
+                onToggleFavorite={handleToggleFavorite}
+              />
+            )}
+
+            {/* D. Featured Products / Main Catalogue Grid */}
+            <div className="product-catalogue-heading-row">
+              <div className="catalogue-title-wrap">
+                <span className="section-badge">
+                  {showFavoritesOnly ? 'My Saved Items' : 'Campus Marketplace'}
+                </span>
+                <h2 className="section-title">
+                  {showFavoritesOnly
+                    ? `Favorites Collection (${filteredProducts.length})`
+                    : filters.category
+                    ? `${filters.category} Products`
+                    : 'Featured Products'}
+                </h2>
+              </div>
+              {showFavoritesOnly && (
+                <button
+                  type="button"
+                  className="btn-view-all-catalogue"
+                  onClick={() => setShowFavoritesOnly(false)}
+                >
+                  ← Back to All Products
+                </button>
+              )}
+            </div>
+
             <FilterBar
               filters={filters}
               categories={categories}
@@ -430,6 +549,8 @@ export function AppContent() {
                 <ProductGrid
                   products={filteredProducts}
                   onSelectProduct={handleSelectProduct}
+                  favorites={favorites}
+                  onToggleFavorite={handleToggleFavorite}
                 />
                 {pagination && (
                   <Pagination
@@ -444,14 +565,13 @@ export function AppContent() {
         )}
       </main>
 
-      <footer className="site-footer">
-        <p>© 2026 Addis Ababa University Campus Market — University Student Commerce Platform</p>
-      </footer>
+      {/* F. Modern Footer */}
+      <Footer />
     </div>
   );
 }
 
-export default function App() {
+export function App() {
   return (
     <AuthProvider>
       <CartProvider>
@@ -460,3 +580,5 @@ export default function App() {
     </AuthProvider>
   );
 }
+
+export default App;
