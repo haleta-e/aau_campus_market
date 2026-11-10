@@ -1,6 +1,7 @@
 import { Sparkles, TrendingUp, Tag, Award, ArrowRight } from 'lucide-react';
 import { Product } from '../types/product';
-import { ProductCard } from './ProductCard';
+import { getCampusEmoji } from '../utils/emojiMap';
+import { getProductImageUrl } from '../utils/productImages';
 
 interface SpecialOffersSectionProps {
   products: Product[];
@@ -18,8 +19,6 @@ export function SpecialOffersSection({
   onTabChange,
   onSelectProduct,
   onViewAllOffers,
-  favorites,
-  onToggleFavorite,
 }: SpecialOffersSectionProps) {
   // Filter products based on active tab
   const getDisplayedProducts = () => {
@@ -27,16 +26,12 @@ export function SpecialOffersSection({
 
     switch (activeTab) {
       case 'deals':
-        // Today's deals: low stock or specific affordable student essentials
         return products.slice(0, 4);
       case 'discounts':
-        // High-ticket items with biggest value savings
         return [...products].sort((a, b) => parseFloat(b.price) - parseFloat(a.price)).slice(0, 4);
       case 'new-arrivals':
-        // New arrivals: sort by date or take recent items
         return [...products].reverse().slice(0, 4);
       case 'best-sellers':
-        // Best sellers: high stock / popular items
         return [...products].sort((a, b) => b.stock_quantity - a.stock_quantity).slice(0, 4);
       default:
         return products.slice(0, 4);
@@ -107,17 +102,53 @@ export function SpecialOffersSection({
           </div>
         </div>
 
-        {/* Product Cards for the Special Offers */}
+        {/* Distinctive Special Offer Spotlight Cards */}
         <div className="special-offers-grid">
-          {displayed.map((product) => (
-            <ProductCard
-              key={`special-${product.id}`}
-              product={product}
-              onSelectProduct={onSelectProduct}
-              isFavorite={favorites?.has(product.id)}
-              onToggleFavorite={onToggleFavorite}
-            />
-          ))}
+          {displayed.map((product) => {
+            const numericPrice = parseFloat(product.price);
+            const formattedPrice = isNaN(numericPrice)
+              ? product.price
+              : `${numericPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ETB`;
+            const originalPrice = !isNaN(numericPrice)
+              ? `${(numericPrice * 1.2).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ETB`
+              : null;
+
+            return (
+              <div
+                key={`special-${product.id}`}
+                className="special-offer-card"
+                onClick={() => onSelectProduct(product)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') onSelectProduct(product);
+                }}
+              >
+                <div className="special-card-media">
+                  <img
+                    src={getProductImageUrl(product)}
+                    alt={product.name}
+                    className="special-card-image"
+                    loading="lazy"
+                  />
+                  <span className="special-deal-tag">Featured Deal</span>
+                </div>
+                <div className="special-card-content">
+                  <span className="special-category-pill">{product.category}</span>
+                  <div className="special-item-title" title={product.name}>
+                    {product.name} [Special Deal]
+                  </div>
+                  <div className="special-price-row">
+                    <span className="special-price">{formattedPrice}</span>
+                    {originalPrice && <span className="special-orig-price">{originalPrice}</span>}
+                  </div>
+                  <div className="special-campus-row">
+                    <span>{getCampusEmoji(product.campus_location || '')} {product.campus_location || 'All Campuses'}</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         <div className="offers-footer-action">

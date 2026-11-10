@@ -1,7 +1,7 @@
 import { Laptop, Shirt, UtensilsCrossed, BookOpen, Sparkles, Home, PenTool, Layers } from 'lucide-react';
 
 interface CategoryShowcaseProps {
-  selectedCategory: string;
+  selectedCategory?: string;
   onSelectCategory: (category: string) => void;
 }
 
@@ -81,7 +81,9 @@ export const CATEGORIES_DATA: CategoryItem[] = [
   },
 ];
 
-export function CategoryShowcase({ selectedCategory, onSelectCategory }: CategoryShowcaseProps) {
+export function CategoryShowcase({ selectedCategory = '', onSelectCategory }: CategoryShowcaseProps) {
+  const currentCategory = selectedCategory || '';
+
   return (
     <section className="categories-showcase-section" aria-label="Browse by Category">
       <div className="section-header-row">
@@ -98,8 +100,8 @@ export function CategoryShowcase({ selectedCategory, onSelectCategory }: Categor
         {CATEGORIES_DATA.map((cat) => {
           const Icon = cat.icon;
           const isSelected =
-            (cat.id === 'all' && (!selectedCategory || selectedCategory === '')) ||
-            selectedCategory.toLowerCase() === cat.id.toLowerCase();
+            (cat.id === 'all' && (!currentCategory || currentCategory === '')) ||
+            (Boolean(currentCategory) && currentCategory.toLowerCase() === cat.id.toLowerCase());
 
           return (
             <button
