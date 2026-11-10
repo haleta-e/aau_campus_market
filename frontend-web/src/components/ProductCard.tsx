@@ -47,8 +47,8 @@ export function ProductCard({
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (isOutOfStock) return;
-    if (cartCtx?.addItem) {
-      cartCtx.addItem(product, 1);
+    if (cartCtx?.addToCart) {
+      cartCtx.addToCart(product, 1);
     }
   };
 
