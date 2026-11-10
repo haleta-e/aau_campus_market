@@ -4,18 +4,27 @@ import { ProductCard } from './ProductCard';
 interface ProductGridProps {
   products: Product[];
   onSelectProduct?: (product: Product) => void;
+  favorites?: Set<string>;
+  onToggleFavorite?: (productId: string) => void;
 }
 
-export function ProductGrid({ products, onSelectProduct }: ProductGridProps) {
+export function ProductGrid({
+  products,
+  onSelectProduct,
+  favorites,
+  onToggleFavorite,
+}: ProductGridProps) {
   return (
-    <section className="product-grid" aria-label="Marketplace Products">
+    <div className="product-grid" data-testid="product-grid">
       {products.map((product) => (
         <ProductCard
           key={product.id}
           product={product}
           onSelectProduct={onSelectProduct}
+          isFavorite={favorites?.has(product.id)}
+          onToggleFavorite={onToggleFavorite}
         />
       ))}
-    </section>
+    </div>
   );
 }
