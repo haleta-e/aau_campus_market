@@ -1,6 +1,9 @@
 import { OrderRepository } from './order.repository';
 import { CreateOrderDTO, UpdateOrderStatusDTO } from './order.schema';
 import { JwtPayload } from '../../utils/jwt.util';
+import { db } from '../../db';
+import { sellers } from '../../db/schema';
+import { eq } from 'drizzle-orm';
 
 export class OrderService {
   private repo = new OrderRepository();
@@ -12,10 +15,7 @@ export class OrderService {
     const sellerCheck = await this.repo.findSellerByUserId(actor.userId);
     // Buyers cannot be sellers in this call — just verify seller_id is valid by querying it
     // (seller_id is passed explicitly in body; find it by id)
-    const { db: drizzle } = await import('../../db');
-    const { sellers } = await import('../../db/schema');
-    const { eq } = await import('drizzle-orm');
-    const sellerRows = await drizzle.select().from(sellers).where(eq(sellers.id, dto.seller_id)).limit(1);
+    const sellerRows = await db.select().from(sellers).where(eq(sellers.id, dto.seller_id)).limit(1);
     if (!sellerRows[0]) {
       throw { status: 404, code: 'SELLER_NOT_FOUND', message: 'Seller not found' };
     }
